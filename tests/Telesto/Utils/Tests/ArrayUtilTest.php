@@ -90,7 +90,7 @@ class ArrayUtilTest extends \PHPUnit_Framework_TestCase
             array(
                 array(
                     'InvalidArgumentException',
-                    'Input must be an array or instance of ArrayAccess.'
+                    'Input must be an array or an instance of ArrayAccess.'
                 ),
                 4,
                 array('database', 'host')
@@ -98,7 +98,7 @@ class ArrayUtilTest extends \PHPUnit_Framework_TestCase
             array(
                 array(
                     'InvalidArgumentException',
-                    'Input must be an array or instance of ArrayAccess.'
+                    'Input must be an array or an instance of ArrayAccess.'
                 ),
                 new \stdClass,
                 array('database', 'host')
@@ -370,7 +370,7 @@ class ArrayUtilTest extends \PHPUnit_Framework_TestCase
             array(
                 array(
                     'InvalidArgumentException',
-                    'Array prototype must an be array or instance of ArrayAccess.'
+                    'Array prototype must an be array or an instance of ArrayAccess.'
                 ),
                 $exampleArray,
                 array(

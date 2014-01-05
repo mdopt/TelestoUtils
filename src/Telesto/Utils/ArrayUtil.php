@@ -21,7 +21,7 @@ abstract class ArrayUtil
     )
     {
         if (!static::isArrayOrArrayAccess($input)) {
-            throw new \InvalidArgumentException('Input must be an array or instance of ArrayAccess.');
+            throw new \InvalidArgumentException('Input must be an array or an instance of ArrayAccess.');
         }
         
         if (count($keys) === 0) {
@@ -119,7 +119,7 @@ abstract class ArrayUtil
     )
     {
         if (!is_array($arrayPrototype) && !($arrayPrototype instanceof \ArrayAccess)) {
-            throw new \InvalidArgumentException('Array prototype must an be array or instance of ArrayAccess.');
+            throw new \InvalidArgumentException('Array prototype must an be array or an instance of ArrayAccess.');
         }
         
         if (count($keyPathMap) === 0) {

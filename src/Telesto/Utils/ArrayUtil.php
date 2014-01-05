@@ -5,11 +5,13 @@ namespace Telesto\Utils;
 abstract class ArrayUtil
 {
     /**
-     * @return  mixed
      * @param   array|\ArrayAccess          $input
      * @param   string[]                    $keys
      * @param   mixed                       $defaultValue
      * @param   bool                        $throwOnNonExisting
+     *
+     * @return  mixed
+     *
      * @throws  \InvalidArgumentException   on invalid arguments
      * @throws  \RuntimeException           when element does not exist and $throwOnNonExisting is set to true
      */
@@ -64,12 +66,14 @@ abstract class ArrayUtil
     }
     
     /**
-     * @return  mixed
      * @param   array|\ArrayAccess          $input
      * @param   string                      $keyPath
      * @param   mixed                       $defaultValue
      * @param   bool                        $throwOnNonExisting
      * @param   string                      $keySeparator
+     *
+     * @return  mixed
+     *
      * @throws  \InvalidArgumentException   on invalid arguments
      * @throws  \RuntimeException           when element does not exist and $throwOnNonExisting is set to true
      */
@@ -99,13 +103,20 @@ abstract class ArrayUtil
     }
     
     /**
-     * @return  array|\ArrayAccess
+     * Transforms one array or \ArrayAccess instance to another using a transformation map and array prototype.
+     *
+     * Only values at requested keys are used, others are ignored.
+     * Values can be overwritten if destination keys collide.
+     *
      * @param   array|\ArrayAccess          $input
-     * @param   array                       $keyPathMap         A string=> string array
+     * @param   array                       $keyPathMap         a sourceKey => destinationKey array
      * @param   mixed                       $defaultValue
      * @param   bool                        $throwOnNonExisting
      * @param   string                      $keySeparator
-     * @param   array|\ArrayAccess          $arrayPrototype
+     * @param   array|\ArrayAccess          $arrayPrototype     Prototype for an empty array
+     *
+     * @return  array|\ArrayAccess
+     *
      * @throws  \InvalidArgumentException   on invalid arguments
      * @throws  \RuntimeException           when element does not exist and $throwOnNonExisting is set to true
      */

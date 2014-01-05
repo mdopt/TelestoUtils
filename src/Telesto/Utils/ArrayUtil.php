@@ -7,10 +7,10 @@ abstract class ArrayUtil
     /**
      * @return  mixed
      * @param   array|\ArrayAccess          $input
-     * @param   array                       $keys
+     * @param   string[]                    $keys
      * @param   mixed                       $defaultValue
      * @param   bool                        $throwOnNonExisting
-     * @throws  \InvalidArgumentException
+     * @throws  \InvalidArgumentException   on invalid arguments
      * @throws  \RuntimeException           when element does not exist and $throwOnNonExisting is set to true
      */
     public static function getElementByKeys(
@@ -20,7 +20,7 @@ abstract class ArrayUtil
         $throwOnNonExisting = false
     )
     {
-        if (!is_array($input) && !($input instanceof \ArrayAccess)) {
+        if (!static::isArrayOrArrayAccess($input)) {
             throw new \InvalidArgumentException('Input must be an array or instance of ArrayAccess.');
         }
         
@@ -48,7 +48,7 @@ abstract class ArrayUtil
         foreach ($keys as $key) {
             $visitedKeys[] = $key;
             
-            if (!isset($value[$key])) {
+            if (!static::isArrayOrArrayAccess($value) || !isset($value[$key])) {
                 if ($throwOnNonExisting) {
                     throw new \RuntimeException(sprintf('Element at %s does not exist.', json_encode($visitedKeys)));
                 }
@@ -70,7 +70,7 @@ abstract class ArrayUtil
      * @param   mixed                       $defaultValue
      * @param   bool                        $throwOnNonExisting
      * @param   string                      $keySeparator
-     * @throws  \InvalidArgumentException
+     * @throws  \InvalidArgumentException   on invalid arguments
      * @throws  \RuntimeException           when element does not exist and $throwOnNonExisting is set to true
      */
     public static function getElementByKeyPath(
@@ -106,7 +106,7 @@ abstract class ArrayUtil
      * @param   bool                        $throwOnNonExisting
      * @param   string                      $keySeparator
      * @param   array|\ArrayAccess          $arrayPrototype
-     * @throws  \InvalidArgumentException
+     * @throws  \InvalidArgumentException   on invalid arguments
      * @throws  \RuntimeException           when element does not exist and $throwOnNonExisting is set to true
      */
     public static function transformByPathKeyMap(
@@ -172,5 +172,10 @@ abstract class ArrayUtil
         }
         
         return $output;
+    }
+    
+    protected static function isArrayOrArrayAccess($input)
+    {
+        return (is_array($input) || ($input instanceof \ArrayAccess));
     }
 }

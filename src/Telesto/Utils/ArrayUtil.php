@@ -106,7 +106,7 @@ abstract class ArrayUtil
      * Transforms one array or \ArrayAccess instance to another using a transformation map and array prototype.
      *
      * Only values at requested keys are used, others are ignored.
-     * Values can be overwritten if destination keys collide.
+     * Values will be overwritten if destination keys collide.
      *
      * @param   array|\ArrayAccess          $input
      * @param   array                       $keyPathMap         a sourceKey => destinationKey array

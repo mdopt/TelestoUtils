@@ -1,4 +1,4 @@
 <?php
 
 $loader = require __DIR__ . '/../vendor/autoload.php';
-$loader->add('Telesto\\Utils\\Tests', __DIR__);
+$loader->addPsr4('Telesto\\Utils\\Tests\\', __DIR__ . '/src');

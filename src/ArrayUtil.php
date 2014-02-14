@@ -133,7 +133,7 @@ abstract class ArrayUtil
         $arrayPrototype = array()
     )
     {
-        if (!is_array($arrayPrototype) && !($arrayPrototype instanceof ArrayAccess)) {
+        if (!static::isArrayOrArrayAccess($arrayPrototype)) {
             throw new InvalidArgumentException('Array prototype must an be array or an instance of ArrayAccess.');
         }
         

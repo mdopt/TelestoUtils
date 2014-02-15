@@ -7,14 +7,14 @@ use Telesto\Utils\ArrayUtil;
 class ArrayUtilTest extends \PHPUnit_Framework_TestCase
 {
     /**
-     * @dataProvider provideGetElementByKeysData
+     * @dataProvider provideGetElementByKeyPathData
      */
-    public function testGetElementByKeys($expectedValue, $input, array $keys, $defaultValue = null)
+    public function testGetElementByKeyPath($expectedValue, $input, $keyPath, array $options = array())
     {
-        $this->assertSame($expectedValue, ArrayUtil::getElementByKeys($input, $keys, $defaultValue));
+        $this->assertSame($expectedValue, ArrayUtil::getElementByKeyPath($input, $keyPath, $options));
     }
     
-    public function provideGetElementByKeysData()
+    public function provideGetElementByKeyPathData()
     {
         $exampleArray = $this->getExampleArray();
         $exampleArrayObject = new \ArrayObject($exampleArray);
@@ -51,7 +51,9 @@ class ArrayUtilTest extends \PHPUnit_Framework_TestCase
                 array(
                     'database', 'host', 'non_existing_key'
                 ),
-                'defaultValue'
+                array(
+                    'default'   => 'defaultValue'
+                )
             ),
             array(
                 'localhost',
@@ -59,100 +61,7 @@ class ArrayUtilTest extends \PHPUnit_Framework_TestCase
                 array(
                     'database', 'host'
                 )
-            )
-        );
-    }
-    
-    /**
-     * @dataProvider provideGetElementByKeysExceptionsData
-     */
-    public function testGetElementByKeysExceptions(
-        array $expectedException,
-        $input,
-        array $keys,
-        $defaultValue = null,
-        $throwOnNonExisting = false
-    )
-    {
-        $this->setExpectedException(
-            $expectedException[0],
-            $expectedException[1]
-        );
-        
-        ArrayUtil::getElementByKeys($input, $keys, $defaultValue, $throwOnNonExisting);
-    }
-    
-    public function provideGetElementByKeysExceptionsData()
-    {
-        $exampleArray = $this->getExampleArray();
-        
-        return array(
-            array(
-                array(
-                    'InvalidArgumentException',
-                    'Input must be an array or an instance of ArrayAccess.'
-                ),
-                4,
-                array('database', 'host')
             ),
-            array(
-                array(
-                    'InvalidArgumentException',
-                    'Input must be an array or an instance of ArrayAccess.'
-                ),
-                new \stdClass,
-                array('database', 'host')
-            ),
-            array(
-                array(
-                    'InvalidArgumentException',
-                    'At least one key must be given.'
-                ),
-                $exampleArray,
-                array()
-            ),
-            array(
-                array(
-                    'InvalidArgumentException',
-                    'Array of keys must contain only strings and integers, NULL given.'
-                ),
-                $exampleArray,
-                array('database', null, 'host')
-            ),
-            array(
-                array(
-                    'InvalidArgumentException',
-                    'Array of keys must contain only strings and integers, double given.'
-                ),
-                $exampleArray,
-                array('database', 'host', 3.424)
-            ),
-            array(
-                array(
-                    'RuntimeException',
-                    'Element at ["database","host","non_existing_key"] does not exist.'
-                ),
-                $exampleArray,
-                array('database', 'host', 'non_existing_key'),
-                null,
-                true
-            )
-        );
-    }
-    
-    /**
-     * @dataProvider provideGetElementKeyPathData
-     */
-    public function testGetElementByKeyPath($expectedValue, $input, $keyPath, $defaultValue = null, $keySeparator = '.')
-    {
-        $this->assertSame($expectedValue, ArrayUtil::getElementByKeyPath($input, $keyPath, $defaultValue, false, $keySeparator));
-    }
-    
-    public function provideGetElementKeyPathData()
-    {
-        $exampleArray = $this->getExampleArray();
-        
-        return array(
             array(
                 array(
                     'host'      => 'localhost',
@@ -171,22 +80,21 @@ class ArrayUtilTest extends \PHPUnit_Framework_TestCase
                 'root',
                 $exampleArray,
                 'database/user',
-                null,
-                '/'
+                array(
+                    'keySeparator'  => '/'
+                )
             )
         );
     }
     
     /**
-     * @dataProvider provideGetElementByKeyPathExceptionsData
+     * @dataProvider provideGetElementByKeysPathExceptionsData
      */
     public function testGetElementByKeyPathExceptions(
         array $expectedException,
         $input,
         $keyPath,
-        $defaultValue = null,
-        $throwOnNonExisting = false,
-        $keySeparator = '.'
+        array $options = array()
     )
     {
         $this->setExpectedException(
@@ -194,10 +102,10 @@ class ArrayUtilTest extends \PHPUnit_Framework_TestCase
             $expectedException[1]
         );
         
-        ArrayUtil::getElementByKeyPath($input, $keyPath, $defaultValue, $throwOnNonExisting, $keySeparator);
+        ArrayUtil::getElementByKeyPath($input, $keyPath, $options);
     }
     
-    public function provideGetElementByKeyPathExceptionsData()
+    public function provideGetElementByKeysPathExceptionsData()
     {
         $exampleArray = $this->getExampleArray();
         
@@ -205,7 +113,23 @@ class ArrayUtilTest extends \PHPUnit_Framework_TestCase
             array(
                 array(
                     'InvalidArgumentException',
-                    'Key path must be a string, array given.'
+                    'Input must be an array or an instance of ArrayAccess, integer given.'
+                ),
+                4,
+                array('database', 'host')
+            ),
+            array(
+                array(
+                    'InvalidArgumentException',
+                    'Input must be an array or an instance of ArrayAccess, stdClass given.'
+                ),
+                new \stdClass,
+                array('database', 'host')
+            ),
+            array(
+                array(
+                    'InvalidArgumentException',
+                    'At least one key must be given.'
                 ),
                 $exampleArray,
                 array()
@@ -213,24 +137,48 @@ class ArrayUtilTest extends \PHPUnit_Framework_TestCase
             array(
                 array(
                     'InvalidArgumentException',
-                    'Key separator must be a string, NULL given.'
+                    'Array of keys must contain only strings and integers, NULL given at index 1.'
                 ),
                 $exampleArray,
-                'database.host',
-                null,
-                false,
+                array('database', null, 'host')
+            ),
+            array(
+                array(
+                    'InvalidArgumentException',
+                    'Array of keys must contain only strings and integers, double given at index 2.'
+                ),
+                $exampleArray,
+                array('database', 'host', 3.424)
+            ),
+            array(
+                array(
+                    'InvalidArgumentException',
+                    'Key path must be a string or an array, NULL given.'
+                ),
+                $exampleArray,
                 null
             ),
             array(
                 array(
-                    'RuntimeException',
-                    'Element at database/host/non_existing_key does not exist.'
+                    'InvalidArgumentException',
+                    'Option \'keySeparator\' must be a string, integer given.'
                 ),
                 $exampleArray,
-                'database/host/non_existing_key',
-                null,
-                true,
-                '/'
+                'database.host',
+                array(
+                    'keySeparator'  => 3
+                )
+            ),
+            array(
+                array(
+                    'RuntimeException',
+                    'Element at ["database","non_existing_key"] does not exist.'
+                ),
+                $exampleArray,
+                array('database', 'non_existing_key', 'non_existing_key2'),
+                array(
+                    'throwOnNonExisting'    => true
+                )
             )
         );
     }
@@ -242,9 +190,7 @@ class ArrayUtilTest extends \PHPUnit_Framework_TestCase
         $expectedValue,
         $input,
         array $keyPathMap,
-        $defaultValue = null,
-        $throwOnNonExisting = false,
-        $keySeparator = '.'
+        array $options = array()
     )
     {
         $this->assertSame(
@@ -252,9 +198,7 @@ class ArrayUtilTest extends \PHPUnit_Framework_TestCase
             ArrayUtil::transformByPathKeyMap(
                 $input,
                 $keyPathMap,
-                $defaultValue,
-                $throwOnNonExisting,
-                $keySeparator
+                $options
             )
         );
     }
@@ -295,9 +239,10 @@ class ArrayUtilTest extends \PHPUnit_Framework_TestCase
                     'database/user'     => 'db/data/user',
                     'non_existing_key'  => 'extra/new_value'
                 ),
-                4123,
-                false,
-                '/'
+                array(
+                    'default'           => 4123,
+                    'keySeparator'      => '/'
+                )
             )
         );
     }
@@ -324,10 +269,9 @@ class ArrayUtilTest extends \PHPUnit_Framework_TestCase
                 'database.password'     => 'db.pass',
                 'database.host'         => 'db.host'
             ),
-            null,
-            false,
-            '.',
-            $arrayPrototype = new \ArrayObject
+            array(
+                'arrayPrototype'        => new \ArrayObject
+            )
         );
         
         $this->assertEquals($expectedResult, $result);
@@ -341,10 +285,7 @@ class ArrayUtilTest extends \PHPUnit_Framework_TestCase
         array $expectedException,
         $input,
         array $keyPathMap,
-        $defaultValue = null,
-        $throwOnNonExisting = false,
-        $keySeparator = '.',
-        $arrayPrototype = array()
+        array $options = array()
     )
     {
         $this->setExpectedException(
@@ -355,10 +296,7 @@ class ArrayUtilTest extends \PHPUnit_Framework_TestCase
         ArrayUtil::transformByPathKeyMap(
             $input,
             $keyPathMap,
-            $defaultValue,
-            $throwOnNonExisting,
-            $keySeparator,
-            $arrayPrototype
+            $options
         );
     }
     
@@ -370,16 +308,15 @@ class ArrayUtilTest extends \PHPUnit_Framework_TestCase
             array(
                 array(
                     'InvalidArgumentException',
-                    'Array prototype must an be array or an instance of ArrayAccess.'
+                    'Option \'arrayPrototype\' must an be array or an instance of ArrayAccess, integer given.'
                 ),
                 $exampleArray,
                 array(
-                    'database.host' => 'db.host'
+                    'database.host'     => 'db.host'
                 ),
-                null,
-                false,
-                '.',
-                333
+                array(
+                    'arrayPrototype'    => 333
+                )
             ),
             array(
                 array(
@@ -403,7 +340,7 @@ class ArrayUtilTest extends \PHPUnit_Framework_TestCase
             array(
                 array(
                     'InvalidArgumentException',
-                    'Key path map must be a string=> string array, invalid type array at key \'database.user\'.'
+                    'Key path map must be a string=> string array, invalid type array at index \'database.user\'.'
                 ),
                 $exampleArray,
                 array(
@@ -421,8 +358,9 @@ class ArrayUtilTest extends \PHPUnit_Framework_TestCase
                     'database.host'                 => 'db.host',
                     'database.non_existing_field'   => 'db.user'
                 ),
-                null,
-                true
+                array(
+                    'throwOnNonExisting'            => true
+                )
             )
         );
     }

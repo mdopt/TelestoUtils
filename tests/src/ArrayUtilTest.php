@@ -9,7 +9,12 @@ class ArrayUtilTest extends \PHPUnit_Framework_TestCase
     /**
      * @dataProvider provideGetElementByKeyPathData
      */
-    public function testGetElementByKeyPath($expectedValue, $input, $keyPath, array $options = array())
+    public function testGetElementByKeyPath(
+        $expectedValue,
+        $input,
+        $keyPath,
+        array $options = array()
+    )
     {
         $this->assertSame($expectedValue, ArrayUtil::getElementByKeyPath($input, $keyPath, $options));
     }
@@ -20,6 +25,33 @@ class ArrayUtilTest extends \PHPUnit_Framework_TestCase
         $exampleArrayObject = new \ArrayObject($exampleArray);
         
         return array(
+            array(
+                null,
+                array(),
+                'nonExistingKey'
+            ),
+            array(
+                null,
+                array(
+                    'x'         => null
+                ),
+                'x',
+                array(
+                    'throwOnNonExisting'    => true
+                )
+            ),
+            array(
+                null,
+                new \ArrayObject(
+                    array(
+                        'x'         => null
+                    )
+                ),
+                'x',
+                array(
+                    'throwOnNonExisting'    => true
+                )
+            ),
             array(
                 array(
                     'host'      => 'localhost',
@@ -176,6 +208,350 @@ class ArrayUtilTest extends \PHPUnit_Framework_TestCase
                 ),
                 $exampleArray,
                 array('database', 'non_existing_key', 'non_existing_key2'),
+                array(
+                    'throwOnNonExisting'    => true
+                )
+            )
+        );
+    }
+    
+    /**
+     * @dataProvider provideSetElementByKeyPathData
+     */
+    public function testSetElementByKeyPath(
+        $expectedValue,
+        $input,
+        $keyPath,
+        $element,
+        array $options = array()
+    )
+    {
+        ArrayUtil::setElementByKeyPath($input, $keyPath, $element, $options);
+        $this->assertSame($expectedValue, $input);
+    }
+    
+    public function provideSetElementByKeyPathData()
+    {
+        return array(
+            array(
+                array(
+                    'x'     => 100
+                ),
+                array(),
+                array('x'),
+                100
+            ),
+            array(
+                array(
+                    'x'     => array(
+                        'y' => 100
+                    )
+                ),
+                array(
+                    'x'     => 100
+                ),
+                array('x', 'y'),
+                100
+            ),
+            array(
+                array(
+                    'x'     => array(
+                        'y' => 100
+                    )
+                ),
+                array(
+                    'x'     => array(
+                        'y' => 'this value will be replaced'
+                    )
+                ),
+                array('x', 'y'),
+                100
+            ),
+            array(
+                array(
+                    'user'  => array(
+                        'id'        => 10,
+                        'login'     => 'root'
+                    )
+                ),
+                array(
+                    'user'  => array(
+                        'id'        => 10
+                    )
+                ),
+                'user.login',
+                'root'
+            )
+        );
+    }
+    
+    public function testSetElementByKeyPathWithObjects()
+    {
+        $arrayObject = new \ArrayObject(
+            array(
+                'user'          => new \ArrayObject(
+                    array(
+                        'id'    => 10,
+                        'login' => 'root'
+                    )
+                ),
+                'colors'        => array(   // no new \ArrayObject here on purpose
+                    'red',
+                    'green',
+                    'blue'
+                )
+            )
+        );
+        
+        $expectedResult = new \ArrayObject(
+            array(
+                'user'          => new \ArrayObject(
+                    array(
+                        'id'        => 10,
+                        'login'     => 'root',
+                        'password'  => 'password123456'
+                    )
+                ),
+                'colors'        => array(   // no new \ArrayObject here on purpose
+                    'red',
+                    'green',
+                    'blue'
+                )
+            )
+        );
+        
+        ArrayUtil::setElementByKeyPath($arrayObject, 'user.password', 'password123456');
+        $this->assertEquals($expectedResult, $arrayObject);
+        
+        $expectedResult2 = clone $expectedResult;
+        $expectedResult2['colors'][2] = new \ArrayObject(
+            array(
+                'azure'
+            )
+        );
+        
+        ArrayUtil::setElementByKeyPath($arrayObject, 'colors/2/0', 'azure', array('arrayPrototype'=> new \ArrayObject, 'keySeparator'=> '/'));
+        $this->assertEquals($expectedResult2, $arrayObject);
+    }
+    
+    /**
+     * @dataProvider provideSetElementByKeyPathExceptionsData
+     */
+    public function testSetElementByKeyPathExceptions(
+        array $expectedException,
+        $input,
+        $keyPath,
+        $element,
+        array $options = array()
+    )
+    {
+        $this->setExpectedException(
+            $expectedException[0],
+            $expectedException[1]
+        );
+        
+        ArrayUtil::setElementByKeyPath($input, $keyPath, $element, $options);
+    }
+    
+    public function provideSetElementByKeyPathExceptionsData()
+    {
+        return array(
+            array(
+                array(
+                    'InvalidArgumentException',
+                    'Input must be an array or an instance of ArrayAccess, integer given.'
+                ),
+                1302,
+                'database.host',
+                'localhost'
+            ),
+            array(
+                array(
+                    'InvalidArgumentException',
+                    'Option \'keySeparator\' must be a string, array given.'
+                ),
+                array(),
+                'database.host',
+                'localhost',
+                array(
+                    'keySeparator'      => array()
+                )
+            ),
+            array(
+                array(
+                    'InvalidArgumentException',
+                    'Option \'arrayPrototype\' must an be array or an instance of ArrayAccess, string given.'
+                ),
+                array(),
+                'database.host',
+                'localhost',
+                array(
+                    'arrayPrototype'    => 'invalidArrayPrototype'
+                )
+            ),
+            array(
+                array(
+                    'RuntimeException',
+                    'Collision at ["database","user"]: Element should not exist, be an array or an instance of ArrayAccess, string given.'
+                ),
+                array(
+                    'database'          => array(
+                        'user'          => 'root'
+                    )
+                ),
+                'database.user.deeper_key',
+                'localhost',
+                array(
+                    'throwOnCollision'  => true
+                )
+            )
+        );
+    }
+    
+    /**
+     * @dataProvider provideUnsetElementByKeyPathData
+     */
+    public function testUnsetElementByKeyPath(
+        $expectedValue,
+        $input,
+        $keyPath,
+        array $options = array()
+    )
+    {
+        ArrayUtil::unsetElementByKeyPath($input, $keyPath, $options);
+        
+        if (is_array($input)) {
+            $this->assertSame($expectedValue, $input);
+        }
+        else {
+            $this->assertEquals($expectedValue, $input);
+        }
+    }
+    
+    public function provideUnsetElementByKeyPathData()
+    {
+        return array(
+            array(
+                array(
+                    'x'         => 100,
+                ),
+                array(
+                    'x'         => 100,
+                    'y'         => 200
+                ),
+                'y'
+            ),
+            array(
+                new \ArrayObject(),
+                new \ArrayObject(
+                    array(
+                        'x'     => 100
+                    )
+                ),
+                'x'
+            ),
+            array(
+                array(
+                    'colors'        => array(
+                        0           => 'red',
+                        2           => 'blue'
+                    )
+                ),
+                array(
+                    'colors'        => array(
+                        'red',
+                        'green',
+                        'blue'
+                    )
+                ),
+                array('colors', 1)
+            ),
+            array(
+                array(),
+                array(),
+                'nonExistingKey'
+            ),
+            array(
+                new \ArrayObject(),
+                new \ArrayObject(),
+                'nonExistingKey'
+            ),
+            array(
+                array(
+                    'user'          => array(
+                        'id'        => 10
+                    )
+                ),
+                array(
+                    'user'          => array(
+                        'id'        => 10,
+                        'favorite_movies'   => array(
+                            'The Terminator',
+                            'Pulp Fiction'
+                        )
+                    )
+                ),
+                'user/favorite_movies',
+                array(
+                    'keySeparator'  => '/'
+                )
+            ),
+            array(
+                array(),
+                array(
+                    'x'             => null,
+                ),
+                'x',
+                array(
+                    'throwOnNonExisting'    => true
+                )
+            )
+        );
+    }
+    
+    /**
+     * @dataProvider provideUnsetElementByKeyPathExceptionsData
+     */
+    public function testUnsetElementByKeyPathExceptions(
+        array $expectedException,
+        $input,
+        $keyPath,
+        array $options = array()
+    )
+    {
+        $this->setExpectedException(
+            $expectedException[0],
+            $expectedException[1]
+        );
+        
+        ArrayUtil::unsetElementByKeyPath($input, $keyPath, $options);
+    }
+    
+    public function provideUnsetElementByKeyPathExceptionsData()
+    {
+        return array(
+            array(
+                array(
+                    'RuntimeException',
+                    'Element at ["x"] does not exist.'
+                ),
+                array(
+                    'y'         => 10
+                ),
+                'x.y.z',
+                array(
+                    'throwOnNonExisting'    => true
+                )
+            ),
+            array(
+                array(
+                    'RuntimeException',
+                    'Element at ["database","host"] does not exist.'
+                ),
+                array(
+                    'database'  => array()
+                ),
+                'database.host',
                 array(
                     'throwOnNonExisting'    => true
                 )
@@ -360,6 +736,20 @@ class ArrayUtilTest extends \PHPUnit_Framework_TestCase
                 ),
                 array(
                     'throwOnNonExisting'            => true
+                )
+            ),
+            array(
+                array(
+                    'RuntimeException',
+                    'Collision at ["db","host"]: Element should not exist, be an array or an instance of ArrayAccess, string given.'
+                ),
+                $exampleArray,
+                array(
+                    'database.host'                 => 'db.host',
+                    'database.user'                 => 'db.host.0'
+                ),
+                array(
+                    'throwOnCollision'              => true
                 )
             )
         );

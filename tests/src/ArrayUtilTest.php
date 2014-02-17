@@ -420,11 +420,11 @@ class ArrayUtilTest extends \PHPUnit_Framework_TestCase
     {
         ArrayUtil::unsetElementByKeyPath($input, $keyPath, $options);
         
-        if (is_array($input)) {
-            $this->assertSame($expectedValue, $input);
+        if (is_object($input)) {
+            $this->assertEquals($expectedValue, $input);
         }
         else {
-            $this->assertEquals($expectedValue, $input);
+            $this->assertSame($expectedValue, $input);
         }
     }
     
@@ -705,17 +705,6 @@ class ArrayUtilTest extends \PHPUnit_Framework_TestCase
             array(
                 array(
                     'InvalidArgumentException',
-                    'Key path map must be a string=> string array, invalid key \'3\'.'
-                ),
-                $exampleArray,
-                array(
-                    'database.host' => 'db.host',
-                    3               => 'extra.new_field'
-                )
-            ),
-            array(
-                array(
-                    'InvalidArgumentException',
                     'Key path map must be a string=> string array, invalid type array at index \'database.user\'.'
                 ),
                 $exampleArray,
@@ -750,6 +739,111 @@ class ArrayUtilTest extends \PHPUnit_Framework_TestCase
                 ),
                 array(
                     'throwOnCollision'              => true
+                )
+            )
+        );
+    }
+    
+    /**
+     * @dataProvider provideCopyByKeyPathMapData
+     */
+    public function testCopyByKeyPathMap(
+        $expectedValue,
+        $input,
+        $output,
+        array $keyPathMap,
+        array $options = array()
+    )
+    {
+        ArrayUtil::copyByKeyPathMap($input, $output, $keyPathMap, $options);
+        
+        if (is_object($output)) {
+            $this->assertEquals($expectedValue, $output);
+        }
+        else {
+            $this->assertSame($expectedValue, $output);
+        }
+    }
+    
+    public function provideCopyByKeyPathMapData()
+    {
+        return array(
+            array(
+                array(
+                    'x'         => 10,
+                    'colors'    => array(
+                        'red',
+                        'green'
+                    )
+                ),
+                array(
+                    10,
+                    array(
+                        array(
+                            'red',
+                            'green'
+                        )
+                    )
+                ),
+                array(
+                    'x'             => 30 // will get overwritten
+                ),
+                array(
+                    '0'             => 'x',
+                    '1.0'           => 'colors'
+                )
+            ),
+            array(
+                new \ArrayObject(
+                    array(
+                        'name'      => 'John'
+                    )
+                ),
+                new \ArrayObject(
+                    array(
+                        'John',
+                        'Mike'
+                    )
+                ),
+                new \ArrayObject(),
+                array(
+                    '0'             => 'name'
+                )
+            )
+        );
+    }
+    
+    /**
+     * @dataProvider providerCopyByPathMapExceptionsData
+     */
+    public function testCopyByKeyPathMapExceptions(
+        array $exceptionData,
+        $input,
+        $output,
+        array $keyPathMap,
+        array $options = array()
+    )
+    {
+        $this->setExpectedException(
+            $exceptionData[0],
+            $exceptionData[1]
+        );
+        
+        ArrayUtil::copyByKeyPathMap($input, $output, $keyPathMap, $options);
+    }
+    
+    public function providerCopyByPathMapExceptionsData()
+    {
+        return array(
+            array(
+                array(
+                    'InvalidArgumentException',
+                    'Output must be an array or an instance of ArrayAccess, integer given.'
+                ),
+                array(),
+                1203,
+                array(
+                    'x'         => 'y'
                 )
             )
         );

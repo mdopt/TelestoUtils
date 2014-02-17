@@ -204,7 +204,7 @@ abstract class ArrayUtil
             $offsetExists = (
                 $isArrayOrArrayAccess
                 && (
-                    is_array($value)? array_key_exists($key, $value) : $value->offsetExists($key) 
+                    is_array($value)? array_key_exists($key, $value) : $value->offsetExists($key)
                 )
             );
             
@@ -219,10 +219,10 @@ abstract class ArrayUtil
             
             if ($isLastKey) {
                 unset($value[$key]);
-                return;
             }
-            
-            $value = &$value[$key];
+            else {
+                $value = &$value[$key];
+            }
         }
     }
     
@@ -256,6 +256,42 @@ abstract class ArrayUtil
         array $options = array()
     )
     {
+        static::validateArrayPrototypeOption($options);
+        $arrayPrototype = array_key_exists('arrayPrototype', $options)? $options['arrayPrototype'] : array();
+        
+        $output = is_object($arrayPrototype)? clone $arrayPrototype : $arrayPrototype;
+        static::doCopyByKeyPathMap($input, $output, $keyPathMap, $options);
+        
+        return $output;
+    }
+    
+    /**
+     * Works similarly to 'transformByKeyPathMap', but copies values to
+     * an existing array|ArrayAccess $output instead of returning new one.
+     */
+    public static function copyByKeyPathMap(
+        $input,
+        &$output,
+        array $keyPathMap,
+        array $options = array()
+    )
+    {
+        if (!static::isArrayOrArrayAccess($output)) {
+            throw new InvalidArgumentException(
+                sprintf('Output must be an array or an instance of ArrayAccess, %s given.', TypeUtil::getType($output))
+            );
+        }
+        
+        static::doCopyByKeyPathMap($input, $output, $keyPathMap, $options);
+    }
+    
+    protected static function doCopyByKeyPathMap(
+        $input,
+        &$output,
+        array $keyPathMap,
+        array $options = array()
+    )
+    {
         static::validateArrayOrArrayAccess($input);
         static::validateKeySeparatorOption($options);
         static::validateArrayPrototypeOption($options);
@@ -268,15 +304,6 @@ abstract class ArrayUtil
         $arrayPrototype = array_key_exists('arrayPrototype', $options)? $options['arrayPrototype'] : array();
         
         foreach ($keyPathMap as $inputKeyPath=> $outputKeyPath) {
-            if (!is_string($inputKeyPath)) {
-                throw new InvalidArgumentException(
-                    sprintf(
-                        'Key path map must be a string=> string array, invalid key \'%s\'.',
-                        $inputKeyPath
-                    )
-                );
-            }
-            
             if (!is_string($outputKeyPath)) {
                 throw new InvalidArgumentException(
                     sprintf(
@@ -288,14 +315,14 @@ abstract class ArrayUtil
             }
         }
         
-        $output = is_object($arrayPrototype)? clone $arrayPrototype : $arrayPrototype;
-        
-        foreach ($keyPathMap as $inputKeyPath=> $outputKeyPath) { 
+        foreach ($keyPathMap as $inputKeyPath=> $outputKeyPath) {
+            // string keys get casted to integers if they contain only numbers
+            // array('1'=> 'something') becomes array(1=> 'something')
+            $inputKeyPath = (string) $inputKeyPath;
+            
             $element = static::getElementByKeyPath($input, $inputKeyPath, $options);
             static::setElementByKeyPath($output, $outputKeyPath, $element, $options);
         }
-        
-        return $output;
     }
     
     protected static function isArrayOrArrayAccess($input)

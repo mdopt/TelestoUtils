@@ -560,9 +560,9 @@ class ArrayUtilTest extends \PHPUnit_Framework_TestCase
     }
     
     /**
-     * @dataProvider provideTransformByPathKeyMapData
+     * @dataProvider provideTransformByKeyPathMapData
      */
-    public function testTransformByPathKeyMap(
+    public function testTransformByKeyPathMap(
         $expectedValue,
         $input,
         array $keyPathMap,
@@ -571,7 +571,7 @@ class ArrayUtilTest extends \PHPUnit_Framework_TestCase
     {
         $this->assertSame(
             $expectedValue,
-            ArrayUtil::transformByPathKeyMap(
+            ArrayUtil::transformByKeyPathMap(
                 $input,
                 $keyPathMap,
                 $options
@@ -579,7 +579,7 @@ class ArrayUtilTest extends \PHPUnit_Framework_TestCase
         );
     }
     
-    public function provideTransformByPathKeyMapData()
+    public function provideTransformByKeyPathMapData()
     {
         $exampleArray = $this->getExampleArray();
         
@@ -623,7 +623,7 @@ class ArrayUtilTest extends \PHPUnit_Framework_TestCase
         );
     }
     
-    public function testTransformByPathKeyMapWithObjects()
+    public function testTransformByKeyPathMapWithObjects()
     {
         $exampleArray = $this->getExampleArray();
         $exampleArrayObject = new \ArrayObject($exampleArray);
@@ -639,7 +639,7 @@ class ArrayUtilTest extends \PHPUnit_Framework_TestCase
             )
         );
         
-        $result = ArrayUtil::transformByPathKeyMap(
+        $result = ArrayUtil::transformByKeyPathMap(
             $exampleArrayObject,
             array(
                 'database.password'     => 'db.pass',
@@ -655,9 +655,9 @@ class ArrayUtilTest extends \PHPUnit_Framework_TestCase
     }
     
     /**
-     * @dataProvider provideTransformByPathKeyMapExceptionsData
+     * @dataProvider provideTransformByKeyPathMapExceptionsData
      */
-    public function testTransformArrayByPathKeyMapExceptions(
+    public function testTransformArrayByKeyPathMapExceptions(
         array $expectedException,
         $input,
         array $keyPathMap,
@@ -669,14 +669,14 @@ class ArrayUtilTest extends \PHPUnit_Framework_TestCase
             $expectedException[1]
         );
         
-        ArrayUtil::transformByPathKeyMap(
+        ArrayUtil::transformByKeyPathMap(
             $input,
             $keyPathMap,
             $options
         );
     }
     
-    public function provideTransformByPathKeyMapExceptionsData()
+    public function provideTransformByKeyPathMapExceptionsData()
     {
         $exampleArray = $this->getExampleArray();
         

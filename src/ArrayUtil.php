@@ -11,7 +11,7 @@ abstract class ArrayUtil
     /**
      * $options:
      * - default                [mixed]     default: null.
-     * - keySeparator           [string]    used only if $pathKey is a string, default: '.'
+     * - keySeparator           [string]    used only if $keyPath is a string, default: '.'
      * - throwOnNonExisting     [bool]      default: false
      *
      * @param   array|ArrayAccess           $input
@@ -250,7 +250,7 @@ abstract class ArrayUtil
      * @throws  InvalidArgumentException    on invalid arguments
      * @throws  RuntimeException
      */
-    public static function transformByPathKeyMap(
+    public static function transformByKeyPathMap(
         $input,
         array $keyPathMap,
         array $options = array()

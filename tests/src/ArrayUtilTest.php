@@ -619,6 +619,23 @@ class ArrayUtilTest extends \PHPUnit_Framework_TestCase
                     'default'           => 4123,
                     'keySeparator'      => '/'
                 )
+            ),
+            array(
+                array(
+                    'db_host'           => 'localhost',
+                    'db_user'           => 'root',
+                ),
+                $exampleArray,
+                array(
+                    'database.host'     => 'db_host',
+                    'database.user'     => 'db_user',
+                    'non_existing_key'  => 'new_value',
+                    'non_existing_key2' => 'level1.level2.level3'
+                ),
+                array(
+                    'throwOnNonExisting'=> true,
+                    'omitNonExisting'   => true // should overwrite throwOnNonExisting
+                )
             )
         );
     }
@@ -705,7 +722,7 @@ class ArrayUtilTest extends \PHPUnit_Framework_TestCase
             array(
                 array(
                     'InvalidArgumentException',
-                    'Key path map must be a string=> string array, invalid type array at index \'database.user\'.'
+                    'Key path map must be a int|string => string array, invalid type array at index \'database.user\'.'
                 ),
                 $exampleArray,
                 array(

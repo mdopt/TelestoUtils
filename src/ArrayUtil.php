@@ -240,6 +240,9 @@ abstract class ArrayUtil
      * - throwOnNonExisting     [bool]                  see 'getElementByKeyPath'
      * - throwOnCollision       [bool]                  see 'setElementByKeyPath'
      * - arrayPrototype         [array|ArrayAccess]     see 'setElementByKeyPath'
+     * - omitNonExisting        [bool]                  When true, values at non existing source keys will omitted
+     *                                                  (no value at destination keys will be set, instead of default)
+     *                                                  Overwrites 'throwOnNonExisting'. Default: false.
      *
      * @param   array|ArrayAccess           $input
      * @param   array                       $keyPathMap         a sourceKey => destinationKey array
@@ -267,7 +270,7 @@ abstract class ArrayUtil
     
     /**
      * Works similarly to 'transformByKeyPathMap', but copies values to
-     * an existing array|ArrayAccess $output instead of returning new one.
+     * an existing array|ArrayAccess($output) instead of returning a new one.
      */
     public static function copyByKeyPathMap(
         $input,
@@ -303,11 +306,14 @@ abstract class ArrayUtil
         $keySeparator = array_key_exists('keySeparator', $options)? $options['keySeparator'] : '.';
         $arrayPrototype = array_key_exists('arrayPrototype', $options)? $options['arrayPrototype'] : array();
         
+        $omitNonExisting = !empty($options['omitNonExisting']);
+        $getOptions = $omitNonExisting? array_merge($options, array('omitNonExisting'=> true)) : $options;
+        
         foreach ($keyPathMap as $inputKeyPath=> $outputKeyPath) {
             if (!is_string($outputKeyPath)) {
                 throw new InvalidArgumentException(
                     sprintf(
-                        'Key path map must be a string=> string array, invalid type %s at index \'%s\'.',
+                        'Key path map must be a int|string => string array, invalid type %s at index \'%s\'.',
                         TypeUtil::getType($outputKeyPath),
                         $inputKeyPath
                     )
@@ -320,7 +326,19 @@ abstract class ArrayUtil
             // array('1'=> 'something') becomes array(1=> 'something')
             $inputKeyPath = (string) $inputKeyPath;
             
-            $element = static::getElementByKeyPath($input, $inputKeyPath, $options);
+            if ($omitNonExisting) {
+                try {
+                    $element = static::getElementByKeyPath($input, $inputKeyPath, $getOptions);
+                }
+                catch (RuntimeException $e) {
+                    continue;
+                }
+            }
+            else {
+                $element = static::getElementByKeyPath($input, $inputKeyPath, $getOptions);
+            }
+            
+            
             static::setElementByKeyPath($output, $outputKeyPath, $element, $options);
         }
     }

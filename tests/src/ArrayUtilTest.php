@@ -635,7 +635,7 @@ class ArrayUtilTest extends \PHPUnit_Framework_TestCase
                     'non_existing_key2' => 'level1.level2.level3'
                 ),
                 array(
-                    'throwOnNonExisting'=> true,
+                    'throwOnNonExisting'=> false,
                     'omitNonExisting'   => true // should overwrite throwOnNonExisting
                 )
             )

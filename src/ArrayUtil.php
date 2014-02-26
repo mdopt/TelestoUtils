@@ -307,7 +307,7 @@ abstract class ArrayUtil
         $arrayPrototype = array_key_exists('arrayPrototype', $options)? $options['arrayPrototype'] : array();
         
         $omitNonExisting = !empty($options['omitNonExisting']);
-        $getOptions = $omitNonExisting? array_merge($options, array('omitNonExisting'=> true)) : $options;
+        $getOptions = $omitNonExisting? array_merge($options, array('throwOnNonExisting'=> true)) : $options;
         
         foreach ($keyPathMap as $inputKeyPath=> $outputKeyPath) {
             if (!is_string($outputKeyPath)) {

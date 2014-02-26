@@ -40,7 +40,7 @@ abstract class ArrayUtil
         $defaultValue = array_key_exists('default', $options)? $options['default'] : null;
         $keySeparator = array_key_exists('keySeparator', $options)? $options['keySeparator'] : '.';
         
-        $keyPath = is_array($keyPath)? $keyPath : explode($keySeparator, $keyPath);
+        $keyPath = is_array($keyPath)? $keyPath : StringUtil::explode($keySeparator, $keyPath, null, array('escapeChar'=> '\\'));
         
         $visitedKeys = array();
         $value = &$input;
@@ -114,7 +114,7 @@ abstract class ArrayUtil
         $throwOnCollision = !empty($options['throwOnCollision']);
         $keySeparator = array_key_exists('keySeparator', $options)? $options['keySeparator'] : '.';
         
-        $keyPath = is_array($keyPath)? $keyPath : explode($keySeparator, $keyPath);
+        $keyPath = is_array($keyPath)? $keyPath : StringUtil::explode($keySeparator, $keyPath, null, array('escapeChar'=> '\\'));
         
         $keysCount = count($keyPath);
         $visitedKeys = array();
@@ -186,7 +186,7 @@ abstract class ArrayUtil
         $throwOnNonExisting = !empty($options['throwOnNonExisting']);
         $keySeparator = array_key_exists('keySeparator', $options)? $options['keySeparator'] : '.';
         
-        $keyPath = is_array($keyPath)? $keyPath : explode($keySeparator, $keyPath);
+        $keyPath = is_array($keyPath)? $keyPath : StringUtil::explode($keySeparator, $keyPath, null, array('escapeChar'=> '\\'));
         
         $keysCount = count($keyPath);
         $visitedKeys = array();

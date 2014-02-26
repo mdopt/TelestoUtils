@@ -605,15 +605,17 @@ class ArrayUtilTest extends \PHPUnit_Framework_TestCase
                             'user'      => 'root'
                         )
                     ),
-                    'extra'             => array(
+                    'ext.ra'            => array(
                         'new_value'     => 4123
-                    )
+                    ),
+                    'extra/new_value'   => 4123
                 ),
                 $exampleArray,
                 array(
                     'database/host'     => 'db/data/host',
                     'database/user'     => 'db/data/user',
-                    'non_existing_key'  => 'extra/new_value'
+                    'non_existing_key'  => 'ext.ra/new_value',
+                    'non_existing_key2' => 'extra\/new_value'
                 ),
                 array(
                     'default'           => 4123,

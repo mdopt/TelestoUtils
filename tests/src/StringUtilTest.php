@@ -189,6 +189,17 @@ class StringUtilTest extends \PHPUnit_Framework_TestCase
             ),
             array(
                 array(
+                    '%%.%%.%%'
+                ),
+                '.',
+                '%%%%%.%%%%%.%%%%',
+                null,
+                array(
+                    'escapeChar'    => '%'
+                )
+            ),
+            array(
+                array(
                     'A B',
                     '',
                     '-',

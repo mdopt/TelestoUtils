@@ -47,25 +47,26 @@ abstract class StringUtil
             }
         }
         
-        if (is_null($escapeChar)) {
+        // the following strpos is for optimization:
+        // if there is no escapeChar, there's no need for further parsing
+        if (is_null($escapeChar) || strpos($string, $escapeChar) === false) {
             return is_null($limit)? explode($delimiter, $string) : explode($delimiter, $string, $limit);
         }
         
         $parts = explode($delimiter, $string);
         $partsCount = count($parts);
         
-        $escapeMap = array(
-            str_repeat($escapeChar, 2)      => $escapeChar,
-            $escapeChar . $delimiter        => $delimiter,
-        );
+        $search = str_repeat($escapeChar, 2);
+        $replace = $escapeChar;
         
         // if n is in array, nth part will be joined with (n + 1)th part
         $partKeysToJoin = array();
+        $lastKey = $partsCount - 1;
         
         foreach ($parts as $partKey=> $part) {
-            $isLastKey = ($partKey >= $partsCount - 1);
+            $isLastKey = ($partKey >= $lastKey);
             if ($isLastKey) {
-                $parts[$partKey] = strtr($part, $escapeMap);
+                $parts[$partKey] = str_replace($search, $replace, $part);
                 break;
             }
             
@@ -87,7 +88,7 @@ abstract class StringUtil
                 $part = substr($part, 0, -1);
             }
             
-            $parts[$partKey] = strtr($part, $escapeMap);
+            $parts[$partKey] = str_replace($search, $replace, $part);
         }
         
         krsort($partKeysToJoin);

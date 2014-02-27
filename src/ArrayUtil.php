@@ -34,41 +34,12 @@ abstract class ArrayUtil
         static::validateArrayOrArrayAccess($input);
         static::validateKeyPath($keyPath);
         static::validateKeySeparatorOption($options);
-        static::validateArrayPrototypeOption($options);
         
-        $throwOnNonExisting = !empty($options['throwOnNonExisting']);
-        $defaultValue = array_key_exists('default', $options)? $options['default'] : null;
-        $keySeparator = array_key_exists('keySeparator', $options)? $options['keySeparator'] : '.';
+        $options['throwOnNonExisting'] = !empty($options['throwOnNonExisting']);
+        $options['default'] = array_key_exists('default', $options)? $options['default'] : null;
+        $options['keySeparator'] = array_key_exists('keySeparator', $options)? $options['keySeparator'] : '.';
         
-        $keyPath = is_array($keyPath)? $keyPath : StringUtil::explode($keySeparator, $keyPath, null, array('escapeChar'=> '\\'));
-        
-        $visitedKeys = array();
-        $value = &$input;
-        
-        foreach ($keyPath as $key) {
-            $visitedKeys[] = $key;
-            
-            $isArrayOrArrayAccess = static::isArrayOrArrayAccess($value);
-            $offsetExists = (
-                $isArrayOrArrayAccess
-                && (
-                    is_array($value)? array_key_exists($key, $value) : $value->offsetExists($key) 
-                )
-            );
-            
-            if (!$offsetExists) {
-                if ($throwOnNonExisting) {
-                    throw new RuntimeException(sprintf('Element at %s does not exist.', json_encode($visitedKeys)));
-                }
-                else {
-                    return $defaultValue;
-                }
-            }
-            
-            $value = &$value[$key];
-        }
-        
-        return $value;
+        return static::doGetElementByKeyPath($input, $keyPath, $options);
     }
     
     /**
@@ -110,52 +81,11 @@ abstract class ArrayUtil
         static::validateKeySeparatorOption($options);
         static::validateArrayPrototypeOption($options);
         
-        $arrayPrototype = array_key_exists('arrayPrototype', $options)? $options['arrayPrototype'] : array();
-        $throwOnCollision = !empty($options['throwOnCollision']);
-        $keySeparator = array_key_exists('keySeparator', $options)? $options['keySeparator'] : '.';
+        $options['throwOnCollision'] = !empty($options['throwOnCollision']);
+        $options['keySeparator'] = array_key_exists('keySeparator', $options)? $options['keySeparator'] : '.';
+        $options['arrayPrototype'] = array_key_exists('arrayPrototype', $options)? $options['arrayPrototype'] : array();
         
-        $keyPath = is_array($keyPath)? $keyPath : StringUtil::explode($keySeparator, $keyPath, null, array('escapeChar'=> '\\'));
-        
-        $keysCount = count($keyPath);
-        $visitedKeys = array();
-        $visitedKeysCount = 0;
-        
-        $value = &$input;
-        
-        foreach ($keyPath as $key) {
-            $visitedKeys[] = $key;
-            ++$visitedKeysCount;
-            
-            $isLastKey = ($visitedKeysCount === $keysCount);
-            $offsetExists = is_array($value)? array_key_exists($key, $value) : $value->offsetExists($key);
-            $isArrayOrArrayAccess = ($offsetExists && static::isArrayOrArrayAccess($value[$key]));
-            
-            $isCollision = (
-                !$isLastKey &&
-                $offsetExists &&
-                !$isArrayOrArrayAccess
-            );
-            
-            $makeNewDepth = (!$isLastKey && !$isArrayOrArrayAccess);
-            
-            if ($isCollision && $throwOnCollision) {
-                throw new RuntimeException(
-                    sprintf(
-                        'Collision at %s: Element should not exist, be an array or an instance of ArrayAccess, %s given.',
-                        json_encode($visitedKeys),
-                        TypeUtil::getType($value[$key])
-                    )
-                );
-            }
-            
-            if ($makeNewDepth) {
-                $value[$key] = is_object($arrayPrototype)? clone $arrayPrototype : $arrayPrototype;
-            }
-            
-            $value = &$value[$key];
-        }
-        
-        $value = $element;
+        static::doSetElementByKeyPath($input, $keyPath, $element, $options);
     }
     
     /**
@@ -288,6 +218,102 @@ abstract class ArrayUtil
         static::doCopyByKeyPathMap($input, $output, $keyPathMap, $options);
     }
     
+    protected static function doGetElementByKeyPath(
+        $input,
+        $keyPath,
+        array $options = array()
+    )
+    {
+        $throwOnNonExisting = !empty($options['throwOnNonExisting']);
+        $defaultValue = $options['default'];
+        $keySeparator = $options['keySeparator'];
+        
+        $keyPath = is_array($keyPath)? $keyPath : StringUtil::explode($keySeparator, $keyPath, null, array('escapeChar'=> '\\'));
+        
+        $visitedKeys = array();
+        $value = &$input;
+        
+        foreach ($keyPath as $key) {
+            $visitedKeys[] = $key;
+            
+            $isArrayOrArrayAccess = static::isArrayOrArrayAccess($value);
+            $offsetExists = (
+                $isArrayOrArrayAccess
+                && (
+                    is_array($value)? array_key_exists($key, $value) : $value->offsetExists($key) 
+                )
+            );
+            
+            if (!$offsetExists) {
+                if ($throwOnNonExisting) {
+                    throw new RuntimeException(sprintf('Element at %s does not exist.', json_encode($visitedKeys)));
+                }
+                else {
+                    return $defaultValue;
+                }
+            }
+            
+            $value = &$value[$key];
+        }
+        
+        return $value;
+    }
+    
+    protected static function doSetElementByKeyPath(
+        &$input,
+        $keyPath,
+        $element,
+        array $options = array()
+    )
+    {
+        $arrayPrototype = $options['arrayPrototype'];
+        $throwOnCollision = $options['throwOnCollision'];
+        $keySeparator = $options['keySeparator'];
+        
+        $keyPath = is_array($keyPath)? $keyPath : StringUtil::explode($keySeparator, $keyPath, null, array('escapeChar'=> '\\'));
+        
+        $keysCount = count($keyPath);
+        $visitedKeys = array();
+        $visitedKeysCount = 0;
+        
+        $value = &$input;
+        
+        foreach ($keyPath as $key) {
+            $visitedKeys[] = $key;
+            ++$visitedKeysCount;
+            
+            $isLastKey = ($visitedKeysCount === $keysCount);
+            $offsetExists = is_array($value)? array_key_exists($key, $value) : $value->offsetExists($key);
+            $isArrayOrArrayAccess = ($offsetExists && static::isArrayOrArrayAccess($value[$key]));
+            
+            $isCollision = (
+                !$isLastKey &&
+                $offsetExists &&
+                !$isArrayOrArrayAccess
+            );
+            
+            $makeNewDepth = (!$isLastKey && !$isArrayOrArrayAccess);
+            
+            if ($isCollision && $throwOnCollision) {
+                throw new RuntimeException(
+                    sprintf(
+                        'Collision at %s: Element should not exist, be an array or an instance of ArrayAccess, %s given.',
+                        json_encode($visitedKeys),
+                        TypeUtil::getType($value[$key])
+                    )
+                );
+            }
+            
+            if ($makeNewDepth) {
+                $value[$key] = is_object($arrayPrototype)? clone $arrayPrototype : $arrayPrototype;
+            }
+            
+            $value = &$value[$key];
+        }
+        
+        $value = $element;
+    }
+    
     protected static function doCopyByKeyPathMap(
         $input,
         &$output,
@@ -299,12 +325,15 @@ abstract class ArrayUtil
         static::validateKeySeparatorOption($options);
         static::validateArrayPrototypeOption($options);
         
+        $options['throwOnNonExisting'] = !empty($options['throwOnNonExisting']);
+        $options['throwOnCollision'] = !empty($options['throwOnCollision']);
+        $options['default'] = array_key_exists('default', $options)? $options['default'] : null;
+        $options['keySeparator'] = array_key_exists('keySeparator', $options)? $options['keySeparator'] : '.';
+        $options['arrayPrototype'] = array_key_exists('arrayPrototype', $options)? $options['arrayPrototype'] : array();
+        
         if (count($keyPathMap) === 0) {
             throw new InvalidArgumentException('Path key map must have at least one element.');
         }
-        
-        $keySeparator = array_key_exists('keySeparator', $options)? $options['keySeparator'] : '.';
-        $arrayPrototype = array_key_exists('arrayPrototype', $options)? $options['arrayPrototype'] : array();
         
         $omitNonExisting = !empty($options['omitNonExisting']);
         $getOptions = $omitNonExisting? array_merge($options, array('throwOnNonExisting'=> true)) : $options;
@@ -328,18 +357,17 @@ abstract class ArrayUtil
             
             if ($omitNonExisting) {
                 try {
-                    $element = static::getElementByKeyPath($input, $inputKeyPath, $getOptions);
+                    $element = static::doGetElementByKeyPath($input, $inputKeyPath, $getOptions);
                 }
                 catch (RuntimeException $e) {
                     continue;
                 }
             }
             else {
-                $element = static::getElementByKeyPath($input, $inputKeyPath, $getOptions);
+                $element = static::doGetElementByKeyPath($input, $inputKeyPath, $getOptions);
             }
             
-            
-            static::setElementByKeyPath($output, $outputKeyPath, $element, $options);
+            static::doSetElementByKeyPath($output, $outputKeyPath, $element, $options);
         }
     }
     

@@ -325,15 +325,15 @@ abstract class ArrayUtil
         static::validateKeySeparatorOption($options);
         static::validateArrayPrototypeOption($options);
         
+        if (count($keyPathMap) === 0) {
+            throw new InvalidArgumentException('Path key map must have at least one element.');
+        }
+        
         $options['throwOnNonExisting'] = !empty($options['throwOnNonExisting']);
         $options['throwOnCollision'] = !empty($options['throwOnCollision']);
         $options['default'] = array_key_exists('default', $options)? $options['default'] : null;
         $options['keySeparator'] = array_key_exists('keySeparator', $options)? $options['keySeparator'] : '.';
         $options['arrayPrototype'] = array_key_exists('arrayPrototype', $options)? $options['arrayPrototype'] : array();
-        
-        if (count($keyPathMap) === 0) {
-            throw new InvalidArgumentException('Path key map must have at least one element.');
-        }
         
         $omitNonExisting = !empty($options['omitNonExisting']);
         $getOptions = $omitNonExisting? array_merge($options, array('throwOnNonExisting'=> true)) : $options;

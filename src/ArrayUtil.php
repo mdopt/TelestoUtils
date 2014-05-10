@@ -11,6 +11,29 @@ use LengthException;
 abstract class ArrayUtil
 {
     /**
+     * @param   $input
+     *
+     * @return  bool
+     */
+    public static function isArrayOrArrayAccess($input)
+    {
+        return (is_array($input) || ($input instanceof ArrayAccess));
+    }
+    
+    public static function ensureArrayOrArrayAccess($input, $argumentName)
+    {
+        if (!static::isArrayOrArrayAccess($input)) {
+            throw new InvalidArgumentException(
+                sprintf(
+                    'Argument %s must be an array or an instance of ArrayAccess, %s given.',
+                    $argumentName,
+                    TypeUtil::getType($input)
+                )
+            );
+        }
+    }
+
+    /**
      * $options:
      * - default                [mixed]     default: null.
      * - keySeparator           [string]    used only if $keyPath is a string, default: '.'
@@ -375,11 +398,6 @@ abstract class ArrayUtil
             
             static::doSetElementByKeyPath($output, $outputKeyPath, $element, $options);
         }
-    }
-    
-    protected static function isArrayOrArrayAccess($input)
-    {
-        return (is_array($input) || ($input instanceof ArrayAccess));
     }
 
     protected static function validateArrayOrArrayAccess($input)

@@ -160,7 +160,7 @@ class ArrayUtilTest extends \PHPUnit_Framework_TestCase
             ),
             array(
                 array(
-                    'InvalidArgumentException',
+                    'LengthException',
                     'At least one key must be given.'
                 ),
                 $exampleArray,
@@ -715,7 +715,7 @@ class ArrayUtilTest extends \PHPUnit_Framework_TestCase
             ),
             array(
                 array(
-                    'InvalidArgumentException',
+                    'LengthException',
                     'Path key map must have at least one element.'
                 ),
                 $exampleArray,
@@ -764,9 +764,9 @@ class ArrayUtilTest extends \PHPUnit_Framework_TestCase
     }
     
     /**
-     * @dataProvider provideCopyByKeyPathMapData
+     * @dataProvider provideOverwriteByKeyPathMapData
      */
-    public function testCopyByKeyPathMap(
+    public function testOverwriteByKeyPathMap(
         $expectedValue,
         $input,
         $output,
@@ -774,7 +774,7 @@ class ArrayUtilTest extends \PHPUnit_Framework_TestCase
         array $options = array()
     )
     {
-        ArrayUtil::copyByKeyPathMap($input, $output, $keyPathMap, $options);
+        ArrayUtil::overwriteByKeyPathMap($input, $output, $keyPathMap, $options);
         
         if (is_object($output)) {
             $this->assertEquals($expectedValue, $output);
@@ -784,7 +784,7 @@ class ArrayUtilTest extends \PHPUnit_Framework_TestCase
         }
     }
     
-    public function provideCopyByKeyPathMapData()
+    public function provideOverwriteByKeyPathMapData()
     {
         return array(
             array(
@@ -833,9 +833,9 @@ class ArrayUtilTest extends \PHPUnit_Framework_TestCase
     }
     
     /**
-     * @dataProvider providerCopyByPathMapExceptionsData
+     * @dataProvider provideOverwriteByPathMapExceptionsData
      */
-    public function testCopyByKeyPathMapExceptions(
+    public function testOverwriteByKeyPathMapExceptions(
         array $exceptionData,
         $input,
         $output,
@@ -848,10 +848,10 @@ class ArrayUtilTest extends \PHPUnit_Framework_TestCase
             $exceptionData[1]
         );
         
-        ArrayUtil::copyByKeyPathMap($input, $output, $keyPathMap, $options);
+        ArrayUtil::overwriteByKeyPathMap($input, $output, $keyPathMap, $options);
     }
     
-    public function providerCopyByPathMapExceptionsData()
+    public function provideOverwriteByPathMapExceptionsData()
     {
         return array(
             array(

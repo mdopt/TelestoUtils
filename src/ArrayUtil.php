@@ -3,8 +3,10 @@
 namespace Telesto\Utils;
 
 use ArrayAccess;
+
 use InvalidArgumentException;
 use RuntimeException;
+use LengthException;
 
 abstract class ArrayUtil
 {
@@ -21,7 +23,7 @@ abstract class ArrayUtil
      *
      * @return  mixed
      *
-     * @throws  InvalidArgumentException    on invalid arguments
+     * @throws  LogicException              on invalid arguments
      * @throws  RuntimeException            when element does not exist
      *                                      and 'throwOnNonExisting' option is set to true
      */
@@ -44,7 +46,7 @@ abstract class ArrayUtil
     
     /**
      * $options:
-     * - keySeparator           [string]                see 'getElementByKeyPath'
+     * - keySeparator           [string]                see getElementByKeyPath
      * - throwOnCollision       [bool]                  default: false
      * - arrayPrototype         [array|ArrayAccess]     default: empty array
      *
@@ -65,7 +67,7 @@ abstract class ArrayUtil
      *
      * @return  void
      *
-     * @throws  InvalidArgumentException    on invalid arguments
+     * @throws  LogicException              on invalid arguments
      * @throws  RuntimeException            when collision occurs
      *                                      and 'throwOnCollision' option is set to true
      */
@@ -90,8 +92,8 @@ abstract class ArrayUtil
     
     /**
      * $options:
-     * - keySeparator           [string]    see 'getElementByKeyPath'
-     * - throwOnNonExisting     [bool]      see 'getElementByKeyPath'
+     * - keySeparator           [string]    see getElementByKeyPath
+     * - throwOnNonExisting     [bool]      see getElementByKeyPath
      *
      * @param   array|ArrayAccess           $input
      * @param   string|array                $keyPath
@@ -99,7 +101,7 @@ abstract class ArrayUtil
      *
      * @return  void
      *
-     * @throws  InvalidArgumentException    on invalid arguments
+     * @throws  LogicException              on invalid arguments
      * @throws  RuntimeException            when element already does not exist
      *                                      and 'throwOnNonExisting' option is set to true
      */
@@ -165,11 +167,11 @@ abstract class ArrayUtil
      * might occur (see 'setElementByKeyPath')
      *
      * $options:
-     * - default                [mixed]                 see 'getElementByKeyPath'
-     * - keySeparator           [string]                see 'getElementByKeyPath'
-     * - throwOnNonExisting     [bool]                  see 'getElementByKeyPath'
-     * - throwOnCollision       [bool]                  see 'setElementByKeyPath'
-     * - arrayPrototype         [array|ArrayAccess]     see 'setElementByKeyPath'
+     * - default                [mixed]                 see getElementByKeyPath
+     * - keySeparator           [string]                see getElementByKeyPath
+     * - throwOnNonExisting     [bool]                  see getElementByKeyPath
+     * - throwOnCollision       [bool]                  see setElementByKeyPath
+     * - arrayPrototype         [array|ArrayAccess]     see setElementByKeyPath
      * - omitNonExisting        [bool]                  When true, values at non existing source keys will omitted
      *                                                  (no value at destination keys will be set, instead of default)
      *                                                  Overwrites 'throwOnNonExisting'. Default: false.
@@ -180,7 +182,7 @@ abstract class ArrayUtil
      *
      * @return  array|ArrayAccess
      *
-     * @throws  InvalidArgumentException    on invalid arguments
+     * @throws  LogicException              on invalid arguments
      * @throws  RuntimeException
      */
     public static function transformByKeyPathMap(
@@ -199,10 +201,14 @@ abstract class ArrayUtil
     }
     
     /**
-     * Works similarly to 'transformByKeyPathMap', but copies values to
-     * an existing array|ArrayAccess($output) instead of returning a new one.
+     * Works similarly to transformByKeyPathMap, but overwrites an existing
+     * array|ArrayAccess($output) instead of returning a new one.
+     *
+     * @see ArrayUtil::transformByKeyPathMap
+     *
+     * @return void
      */
-    public static function copyByKeyPathMap(
+    public static function overwriteByKeyPathMap(
         $input,
         &$output,
         array $keyPathMap,
@@ -326,7 +332,7 @@ abstract class ArrayUtil
         static::validateArrayPrototypeOption($options);
         
         if (count($keyPathMap) === 0) {
-            throw new InvalidArgumentException('Path key map must have at least one element.');
+            throw new LengthException('Path key map must have at least one element.');
         }
         
         $options['throwOnNonExisting'] = !empty($options['throwOnNonExisting']);
@@ -403,7 +409,7 @@ abstract class ArrayUtil
     protected static function validateArrayKeyPath(array $keyPath)
     {
         if (count($keyPath) === 0) {
-            throw new InvalidArgumentException('At least one key must be given.');
+            throw new LengthException('At least one key must be given.');
         }
         
         foreach ($keyPath as $index=> $keyPart) {

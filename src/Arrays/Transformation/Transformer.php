@@ -2,6 +2,9 @@
 
 namespace Telesto\Utils\Arrays\Transformation;
 
+/**
+ * Interface for transforming one array|ArrayAccess into another
+ */
 interface Transformer
 {
     /**

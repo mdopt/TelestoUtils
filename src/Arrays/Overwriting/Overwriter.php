@@ -2,6 +2,9 @@
 
 namespace Telesto\Utils\Arrays\Overwriting;
 
+/**
+ * Interface for overwriting one array|ArrayAccess using another
+ */
 interface Overwriter
 {
     /**

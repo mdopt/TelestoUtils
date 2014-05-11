@@ -2,7 +2,7 @@
 
 namespace Telesto\Utils\Arrays\Factories;
 
-use Telesto\Utils\ArrayUtil;
+use Telesto\Utils\Arrays\ValidationUtil;
 
 class PrototypeFactory implements Factory
 {
@@ -16,7 +16,7 @@ class PrototypeFactory implements Factory
      */
     public function __construct($prototype)
     {
-        ArrayUtil::ensureArrayOrArrayAccess($prototype, '$prototype');
+        ValidationUtil::requireArrayOrArrayAccess($prototype, '$prototype');
         
         $this->prototype = $prototype;
     }

@@ -33,4 +33,16 @@ class CreateAndOverwriteTransformerTest extends \PHPUnit_Framework_TestCase
         $output = $transformer->transform($input);
         $this->assertSame($factoryResult, $output);
     }
+    
+    public function testTransformException()
+    {
+        $transformer = new CreateAndOverwriteTransformer(
+            $this->getMock('Telesto\\Utils\\Arrays\\Factories\\Factory'),
+            $this->getMock('Telesto\\Utils\\Arrays\\Overwriting\\Overwriter')
+        );
+        
+        $this->setExpectedException('InvalidArgumentException');
+        
+        $transformer->transform(12);
+    }
 }

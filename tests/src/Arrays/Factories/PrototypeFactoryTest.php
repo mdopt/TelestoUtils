@@ -12,12 +12,14 @@ class PrototypeFactoryTest extends \PHPUnit_Framework_TestCase
     public function testCreateArray($prototype)
     {
         $factory = new PrototypeFactory($prototype);
+        $newArray = $factory->createArray();
         
         if (is_object($prototype)) {
-            $this->assertEquals($prototype, $factory->createArray());
+            $this->assertNotSame($prototype, $newArray);
+            $this->assertEquals($prototype, $newArray);
         }
         else {
-            $this->assertSame($prototype, $factory->createArray());
+            $this->assertSame($prototype, $newArray);
         }
     }
     

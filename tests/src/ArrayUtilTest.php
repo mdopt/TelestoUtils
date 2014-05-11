@@ -3,6 +3,7 @@
 namespace Telesto\Utils\Tests;
 
 use Telesto\Utils\ArrayUtil;
+use Telesto\Utils\Arrays\ReturnMode;
 
 class ArrayUtilTest extends \PHPUnit_Framework_TestCase
 {
@@ -32,8 +33,32 @@ class ArrayUtilTest extends \PHPUnit_Framework_TestCase
             ),
             array(
                 null,
+                array(),
+                'nonExistingKey',
                 array(
-                    'x'         => null
+                    'returnMode'    => ReturnMode::ELEMENT_ONLY
+                )
+            ),
+            array(
+                array(null, false),
+                array(),
+                'nonExistingKey',
+                array(
+                    'returnMode'    => ReturnMode::BOTH
+                )
+            ),
+            array(
+                false,
+                array(),
+                'nonExistingKey',
+                array(
+                    'returnMode'    => ReturnMode::EXISTS_ONLY
+                )
+            ),
+            array(
+                null,
+                array(
+                    'x'             => null
                 ),
                 'x',
                 array(
@@ -68,6 +93,16 @@ class ArrayUtilTest extends \PHPUnit_Framework_TestCase
                 $exampleArray,
                 array(
                     'database', 'host'
+                )
+            ),
+            array(
+                array('localhost', true),
+                $exampleArray,
+                array(
+                    'database', 'host'
+                ),
+                array(
+                    'returnMode'    => ReturnMode::BOTH
                 )
             ),
             array(
@@ -145,7 +180,7 @@ class ArrayUtilTest extends \PHPUnit_Framework_TestCase
             array(
                 array(
                     'InvalidArgumentException',
-                    'Input must be an array or an instance of ArrayAccess, integer given.'
+                    ''
                 ),
                 4,
                 array('database', 'host')
@@ -153,7 +188,7 @@ class ArrayUtilTest extends \PHPUnit_Framework_TestCase
             array(
                 array(
                     'InvalidArgumentException',
-                    'Input must be an array or an instance of ArrayAccess, stdClass given.'
+                    ''
                 ),
                 new \stdClass,
                 array('database', 'host')
@@ -203,6 +238,17 @@ class ArrayUtilTest extends \PHPUnit_Framework_TestCase
             ),
             array(
                 array(
+                    'InvalidArgumentException',
+                    'Option \'returnMode\' must an be same as one of ReturnMode constants.'
+                ),
+                $exampleArray,
+                'database.host',
+                array(
+                    'returnMode' => 'INVALID_MODE'
+                )
+            ),
+            array(
+                array(
                     'RuntimeException',
                     'Element at ["database","non_existing_key"] does not exist.'
                 ),
@@ -211,6 +257,54 @@ class ArrayUtilTest extends \PHPUnit_Framework_TestCase
                 array(
                     'throwOnNonExisting'    => true
                 )
+            )
+        );
+    }
+    
+    /**
+     * @dataProvider provideHasElementAtKeyPathData
+     */
+    public function testHasElementAtKeyPath(
+        $expectedValue,
+        $input,
+        $keyPath,
+        array $options = array()
+    )
+    {
+        $this->assertSame($expectedValue, ArrayUtil::hasElementAtKeyPath($input, $keyPath, $options));
+    }
+    
+    public function provideHasElementAtKeyPathData()
+    {
+        $exampleArray = $this->getExampleArray();
+        
+        return array(
+            array(
+                false,
+                array(),
+                'nonExistingKey'
+            ),
+            array(
+                false,
+                array(),
+                'nonExistingKey',
+                array( // these options should be ignored
+                    'returnMode'        => ReturnMode::ELEMENT_ONLY,
+                    'throwOnNonExisting'=> true
+                )
+            ),
+            array(
+                true,
+                $exampleArray,
+                'database/host',
+                array( // but keySeparator should not
+                    'keySeparator'      => '/'
+                )
+            ),
+            array(
+                true,
+                $exampleArray,
+                'database.host'
             )
         );
     }
@@ -359,7 +453,7 @@ class ArrayUtilTest extends \PHPUnit_Framework_TestCase
             array(
                 array(
                     'InvalidArgumentException',
-                    'Input must be an array or an instance of ArrayAccess, integer given.'
+                    ''
                 ),
                 1302,
                 'database.host',
@@ -554,315 +648,6 @@ class ArrayUtilTest extends \PHPUnit_Framework_TestCase
                 'database.host',
                 array(
                     'throwOnNonExisting'    => true
-                )
-            )
-        );
-    }
-    
-    /**
-     * @dataProvider provideTransformByKeyPathMapData
-     */
-    public function testTransformByKeyPathMap(
-        $expectedValue,
-        $input,
-        array $keyPathMap,
-        array $options = array()
-    )
-    {
-        $this->assertSame(
-            $expectedValue,
-            ArrayUtil::transformByKeyPathMap(
-                $input,
-                $keyPathMap,
-                $options
-            )
-        );
-    }
-    
-    public function provideTransformByKeyPathMapData()
-    {
-        $exampleArray = $this->getExampleArray();
-        
-        return array(
-            array(
-                array(
-                    'database_host'     => 'localhost',
-                    'database_user'     => 'root',
-                    'new_value'         => null
-                ),
-                $exampleArray,
-                array(
-                    'database.host'     => 'database_host',
-                    'database.user'     => 'database_user',
-                    'non_existing_key'  => 'new_value'
-                )
-            ),
-            array(
-                array(
-                    'db'                => array(
-                        'data'          => array(
-                            'host'      => 'localhost',
-                            'user'      => 'root'
-                        )
-                    ),
-                    'ext.ra'            => array(
-                        'new_value'     => 4123
-                    ),
-                    'extra/new_value'   => 4123
-                ),
-                $exampleArray,
-                array(
-                    'database/host'     => 'db/data/host',
-                    'database/user'     => 'db/data/user',
-                    'non_existing_key'  => 'ext.ra/new_value',
-                    'non_existing_key2' => 'extra\/new_value'
-                ),
-                array(
-                    'default'           => 4123,
-                    'keySeparator'      => '/'
-                )
-            ),
-            array(
-                array(
-                    'db_host'           => 'localhost',
-                    'db_user'           => 'root',
-                ),
-                $exampleArray,
-                array(
-                    'database.host'     => 'db_host',
-                    'database.user'     => 'db_user',
-                    'non_existing_key'  => 'new_value',
-                    'non_existing_key2' => 'level1.level2.level3'
-                ),
-                array(
-                    'throwOnNonExisting'=> false,
-                    'omitNonExisting'   => true // should overwrite throwOnNonExisting
-                )
-            )
-        );
-    }
-    
-    public function testTransformByKeyPathMapWithObjects()
-    {
-        $exampleArray = $this->getExampleArray();
-        $exampleArrayObject = new \ArrayObject($exampleArray);
-        
-        $expectedResult = new \ArrayObject(
-            array(
-                'db'                    => new \ArrayObject(
-                    array(
-                        'pass'          => 'XXXX',
-                        'host'          => 'localhost'
-                    )
-                )
-            )
-        );
-        
-        $result = ArrayUtil::transformByKeyPathMap(
-            $exampleArrayObject,
-            array(
-                'database.password'     => 'db.pass',
-                'database.host'         => 'db.host'
-            ),
-            array(
-                'arrayPrototype'        => new \ArrayObject
-            )
-        );
-        
-        $this->assertEquals($expectedResult, $result);
-        $this->assertNotSame($expectedResult, $result);
-    }
-    
-    /**
-     * @dataProvider provideTransformByKeyPathMapExceptionsData
-     */
-    public function testTransformArrayByKeyPathMapExceptions(
-        array $expectedException,
-        $input,
-        array $keyPathMap,
-        array $options = array()
-    )
-    {
-        $this->setExpectedException(
-            $expectedException[0],
-            $expectedException[1]
-        );
-        
-        ArrayUtil::transformByKeyPathMap(
-            $input,
-            $keyPathMap,
-            $options
-        );
-    }
-    
-    public function provideTransformByKeyPathMapExceptionsData()
-    {
-        $exampleArray = $this->getExampleArray();
-        
-        return array(
-            array(
-                array(
-                    'InvalidArgumentException',
-                    'Option \'arrayPrototype\' must an be array or an instance of ArrayAccess, integer given.'
-                ),
-                $exampleArray,
-                array(
-                    'database.host'     => 'db.host'
-                ),
-                array(
-                    'arrayPrototype'    => 333
-                )
-            ),
-            array(
-                array(
-                    'LengthException',
-                    'Path key map must have at least one element.'
-                ),
-                $exampleArray,
-                array()
-            ),
-            array(
-                array(
-                    'InvalidArgumentException',
-                    'Key path map must be a int|string => string array, invalid type array at index \'database.user\'.'
-                ),
-                $exampleArray,
-                array(
-                    'database.host' => 'db.host',
-                    'database.user' => array()
-                )
-            ),
-            array(
-                array(
-                    'RuntimeException',
-                    ''
-                ),
-                $exampleArray,
-                array(
-                    'database.host'                 => 'db.host',
-                    'database.non_existing_field'   => 'db.user'
-                ),
-                array(
-                    'throwOnNonExisting'            => true
-                )
-            ),
-            array(
-                array(
-                    'RuntimeException',
-                    'Collision at ["db","host"]: Element should not exist, be an array or an instance of ArrayAccess, string given.'
-                ),
-                $exampleArray,
-                array(
-                    'database.host'                 => 'db.host',
-                    'database.user'                 => 'db.host.0'
-                ),
-                array(
-                    'throwOnCollision'              => true
-                )
-            )
-        );
-    }
-    
-    /**
-     * @dataProvider provideOverwriteByKeyPathMapData
-     */
-    public function testOverwriteByKeyPathMap(
-        $expectedValue,
-        $input,
-        $output,
-        array $keyPathMap,
-        array $options = array()
-    )
-    {
-        ArrayUtil::overwriteByKeyPathMap($input, $output, $keyPathMap, $options);
-        
-        if (is_object($output)) {
-            $this->assertEquals($expectedValue, $output);
-        }
-        else {
-            $this->assertSame($expectedValue, $output);
-        }
-    }
-    
-    public function provideOverwriteByKeyPathMapData()
-    {
-        return array(
-            array(
-                array(
-                    'x'         => 10,
-                    'colors'    => array(
-                        'red',
-                        'green'
-                    )
-                ),
-                array(
-                    10,
-                    array(
-                        array(
-                            'red',
-                            'green'
-                        )
-                    )
-                ),
-                array(
-                    'x'             => 30 // will get overwritten
-                ),
-                array(
-                    '0'             => 'x',
-                    '1.0'           => 'colors'
-                )
-            ),
-            array(
-                new \ArrayObject(
-                    array(
-                        'name'      => 'John'
-                    )
-                ),
-                new \ArrayObject(
-                    array(
-                        'John',
-                        'Mike'
-                    )
-                ),
-                new \ArrayObject(),
-                array(
-                    '0'             => 'name'
-                )
-            )
-        );
-    }
-    
-    /**
-     * @dataProvider provideOverwriteByPathMapExceptionsData
-     */
-    public function testOverwriteByKeyPathMapExceptions(
-        array $exceptionData,
-        $input,
-        $output,
-        array $keyPathMap,
-        array $options = array()
-    )
-    {
-        $this->setExpectedException(
-            $exceptionData[0],
-            $exceptionData[1]
-        );
-        
-        ArrayUtil::overwriteByKeyPathMap($input, $output, $keyPathMap, $options);
-    }
-    
-    public function provideOverwriteByPathMapExceptionsData()
-    {
-        return array(
-            array(
-                array(
-                    'InvalidArgumentException',
-                    'Output must be an array or an instance of ArrayAccess, integer given.'
-                ),
-                array(),
-                1203,
-                array(
-                    'x'         => 'y'
                 )
             )
         );

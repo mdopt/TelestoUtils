@@ -5,8 +5,11 @@ namespace Telesto\Utils\Arrays\Overwriting;
 use Telesto\Utils\ArrayUtil;
 use Telesto\Utils\Arrays\ReturnMode;
 use Telesto\Utils\Arrays\ValidationUtil;
+use Telesto\Utils\TypeUtil;
 
 use LogicException;
+use InvalidArgumentException;
+use LengthException;
 
 /**
  * Overwriter which uses pairs of key paths in the array form:
@@ -84,8 +87,10 @@ class KeyPathPairsOverwriter implements Overwriter
         array $settings = array()
     )
     {
-        $this->setKeyPathPairs($keyPathPairs);
+        // settings must be set before key path pairs, because string paths
+        // get transformed to arrays using keySeparator setting
         $this->setSettings($settings);
+        $this->setKeyPathPairs($keyPathPairs);
     }
     
     /**
@@ -119,6 +124,16 @@ class KeyPathPairsOverwriter implements Overwriter
     protected function setKeyPathPairs(array $keyPathPairs)
     {
         $this->validateKeyPathPairs($keyPathPairs);
+        
+        foreach ($keyPathPairs as $index => $keyPathPair) {
+            list ($inputKeyPath, $outputKeyPath) = $keyPathPair;
+            
+            $keyPathPairs[$index] = array(
+                ArrayUtil::getKeyPathAsArray($inputKeyPath, $this->settings),
+                ArrayUtil::getKeyPathAsArray($outputKeyPath, $this->settings)
+            );
+        }
+        
         $this->keyPathPairs = $keyPathPairs;
     }
     
@@ -126,6 +141,7 @@ class KeyPathPairsOverwriter implements Overwriter
     {
         $this->validateSettings($settings);
         
+        // These settings should be hardcoded
         $settings['omitValidation']     = true;
         $settings['omitNonExisting']    = !empty($settings['omitNonExisting']);
         
@@ -141,11 +157,53 @@ class KeyPathPairsOverwriter implements Overwriter
     
     protected function validateKeyPathPairs(array $keyPathPairs)
     {
-        // TODO
+        foreach ($keyPathPairs as $index => $keyPathPair) {
+            if (!is_array($keyPathPair)) {
+                throw new InvalidArgumentException(sprintf(
+                    'Argument $keyPathPairs must be an array of arrays, %s given at index %s.',
+                    TypeUtil::getType($keyPathPair),
+                    $index
+                ));
+            }
+            
+            if (count($keyPathPair) != 2) {
+                throw new LengthException(sprintf(
+                    'Arrays in $keyPathPairs must have exactly 2 elements, %d given at index %s.',
+                    count($keyPathPair),
+                    $index
+                ));
+            }
+            
+            $keyPathPair = array_values($keyPathPair);
+            
+            foreach ($keyPathPair as $keyPathIndex => $keyPath) {
+                $e = null;
+                
+                try {
+                    ValidationUtil::requireValidKeyPath($keyPath);
+                }
+                catch (InvalidArgumentException $e) {
+                }
+                catch (LogicException $e) {
+                }
+                
+                if ($e) {
+                    $exceptionClass = get_class($e);
+                    $newMessage = sprintf(
+                        'Invalid value for %s key path at index %s: %s',
+                        $keyPathIndex == 0? 'input' : 'output',
+                        $index,
+                        $e->getMessage()
+                    );
+                    
+                    throw new $exceptionClass($newMessage, $e->getCode(), $e);
+                }
+            }
+        }
     }
     
     protected function validateSettings(array $settings)
     {
-        // TODO
+        ValidationUtil::requireValidOptions($settings, array('keySeparator', 'arrayPrototype'));
     }
 }

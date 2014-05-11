@@ -280,7 +280,7 @@ abstract class ArrayUtil
         return array($element, $exists);
     }
     
-    protected static function getKeyPathAsArray($keyPath, array $options)
+    public static function getKeyPathAsArray($keyPath, array $options)
     {
         if (!is_array($keyPath)) {
             $keySeparator   = isset($options['keySeparator'])? $options['keySeparator'] : '.';

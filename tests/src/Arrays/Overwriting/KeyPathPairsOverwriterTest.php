@@ -9,6 +9,69 @@ use ArrayObject;
 class KeyPathPairsOverwriterTest extends \PHPUnit_Framework_TestCase
 {
     /**
+     * @dataProvider provideConstructorExceptionsData
+     */
+    public function testConstructorExceptions(
+        $expectedException,
+        $keyPathPairs,
+        $settings = array()
+    )
+    {
+        $this->setExpectedException(
+            $expectedException[0],
+            $expectedException[1]
+        );
+        
+        new KeyPathPairsOverwriter($keyPathPairs, $settings);
+    }
+    
+    public function provideConstructorExceptionsData()
+    {
+        return array(
+            array(
+                array(
+                    'InvalidArgumentException',
+                    'Argument $keyPathPairs must be an array of arrays, string given at index 1.'
+                ),
+                array(
+                    array('x', 'y'),
+                    'invalidValue'
+                )
+            ),
+            array(
+                array(
+                    'LengthException',
+                    'Arrays in $keyPathPairs must have exactly 2 elements, 3 given at index 1.'
+                ),
+                array(
+                    array('x', 'y'),
+                    array('x', 'y', 'z')
+                )
+            ),
+            array(
+                array(
+                    'InvalidArgumentException',
+                    'Invalid value for input key path at index 2:'
+                ),
+                array(
+                    array('x', 'y'),
+                    array('x', 'y'),
+                    array(new \stdClass, 'y')
+                )
+            ),
+            array(
+                array(
+                    'InvalidArgumentException',
+                    'Invalid value for output key path at index 0:'
+                ),
+                array(
+                    array('x', new \stdClass)
+                )
+            )
+        );
+    }
+
+    /**
      * @dataProvider provideOverwriteData
      */
     public function testOverwrite(

@@ -81,7 +81,7 @@ abstract class TypeUtil
      *
      * @return  void
      *
-     * @throws  InvalidArgumentException    be default
+     * @throws  InvalidArgumentException    by default
      * @throws  Exception                   any other type of exception if specified in $options
      */
     public static function requireType($input, $type, $argumentName, array $options = array())

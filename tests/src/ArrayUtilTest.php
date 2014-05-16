@@ -653,6 +653,46 @@ class ArrayUtilTest extends \PHPUnit_Framework_TestCase
         );
     }
     
+    /**
+     * @dataProvider provideGetKeyPathAsArray
+     */
+    public function testGetKeyPathAsArray($expectedValue, $keyPath, array $options = array())
+    {
+        $this->assertSame($expectedValue, ArrayUtil::getKeyPathAsArray($keyPath, $options));
+    }
+    
+    public function provideGetKeyPathAsArray()
+    {
+        return array(
+            array(
+                array('x', 'y', 'z'),
+                'x.y.z'
+            ),
+            array(
+                array('users', '0'),
+                'users.0'
+            ),
+            array(
+                array('x', 'y', 'z'),
+                'x/y/z',
+                array(
+                    'keySeparator'  => '/'
+                )
+            ),
+            array(
+                array('x.y.z'),
+                'x.y.z',
+                array(
+                    'keySeparator'  => '/'
+                )
+            ),
+            array(
+                array('x', 'y', 'z'),
+                array('x', 'y', 'z')
+            )
+        );
+    }
+    
     protected function getExampleArray()
     {
         return array(

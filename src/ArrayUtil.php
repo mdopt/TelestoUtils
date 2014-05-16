@@ -18,7 +18,7 @@ abstract class ArrayUtil
      * - default                [mixed]     default: null.
      * - keySeparator           [string]    used only if $keyPath is a string, default: '.'
      * - throwOnNonExisting     [bool]      default: false
-     * - returnMode             [int]       one of ReturnMode constants
+     * - returnMode             [int]       one of ReturnMode constants, default : ReturnMode::ELEMENT_ONLY
      * - omitValidation         [bool]      default: false
      *
      * @param   array|ArrayAccess           $input
@@ -268,6 +268,34 @@ abstract class ArrayUtil
         }
     }
     
+    /**
+     * Transforms key path from string to array using key separator. Example:
+     *
+     * <code>
+     *     ArrayUtil::getKeyPathAsArray('x.y.z'); // returns ['x', 'y', 'z']
+     * </code>
+     *
+     * If the key path is already an array, this array will be returned.
+     *
+     * $options:
+     * - keySeparator           [string]                see getElementByKeyPath
+     *
+     *
+     * @param   string|array    $keyPath
+     * @param   array           $options
+     *
+     * @return  array
+     */
+    public static function getKeyPathAsArray($keyPath, array $options)
+    {
+        if (!is_array($keyPath)) {
+            $keySeparator   = isset($options['keySeparator'])? $options['keySeparator'] : '.';
+            $keyPath        = StringUtil::explode($keySeparator, $keyPath, null, array('escapeChar'=> '\\'));
+        }
+        
+        return $keyPath;
+    }
+    
     protected static function getReturnValue($exists, $element, $returnMode)
     {
         if ($returnMode === ReturnMode::ELEMENT_ONLY) {
@@ -278,15 +306,5 @@ abstract class ArrayUtil
         }
         
         return array($element, $exists);
-    }
-    
-    public static function getKeyPathAsArray($keyPath, array $options)
-    {
-        if (!is_array($keyPath)) {
-            $keySeparator   = isset($options['keySeparator'])? $options['keySeparator'] : '.';
-            $keyPath        = StringUtil::explode($keySeparator, $keyPath, null, array('escapeChar'=> '\\'));
-        }
-        
-        return $keyPath;
     }
 }

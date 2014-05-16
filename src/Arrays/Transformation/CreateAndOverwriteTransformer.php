@@ -14,8 +14,8 @@ use Telesto\Utils\Arrays\ValidationUtil;
  * Since you can perform any transformation this way, most of the 'real' work
  * is done by overwriters. This way we don't have to duplicate functionality.
  *
- * It could be done the other way: putting functionality in transformer and
- * letting the overwriter use the output of the transformation.
+ * It could be done the other way: by putting functionality in the transformer
+ * and letting the overwriter use the output of the transformation.
  * But then, the overwriter would have to know the keys of the output.
  * It is possible (and trivial) for arrays, but not for all ArrayAccess instances.
  */

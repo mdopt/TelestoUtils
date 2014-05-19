@@ -177,17 +177,10 @@ class KeyPathPairsOverwriter implements Overwriter
             $keyPathPair = array_values($keyPathPair);
             
             foreach ($keyPathPair as $keyPathIndex => $keyPath) {
-                $e = null;
-                
                 try {
                     ValidationUtil::requireValidKeyPath($keyPath);
                 }
-                catch (InvalidArgumentException $e) {
-                }
                 catch (LogicException $e) {
-                }
-                
-                if ($e) {
                     $exceptionClass = get_class($e);
                     $newMessage = sprintf(
                         'Invalid value for %s key path at index %s: %s',

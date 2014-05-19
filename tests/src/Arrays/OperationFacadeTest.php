@@ -119,13 +119,13 @@ class OperationFacadeTest extends \PHPUnit_Framework_TestCase
         );
         
         $this->assertEquals(
-            new Overwriting\KeyPathPairsOverwriter(
+            new Overwriting\KeyPathMapOverwriter(
                 array(
                     array('x', 'y')
                 )
             ),
             OperationFacade::createOverwriter(
-                'keyPathPairs',
+                'keyPathMap',
                 array(
                     array('x', 'y')
                 )
@@ -136,7 +136,7 @@ class OperationFacadeTest extends \PHPUnit_Framework_TestCase
             new Overwriting\CompositeOverwriter(
                 array(
                     new Overwriting\AllKeysOverwriter,
-                    new Overwriting\KeyPathPairsOverwriter(
+                    new Overwriting\KeyPathMapOverwriter(
                         array(
                             array('x', 'y')
                         )
@@ -149,7 +149,7 @@ class OperationFacadeTest extends \PHPUnit_Framework_TestCase
                     'allKeys'
                 ),
                 array(
-                    'keyPathPairs',
+                    'keyPathMap',
                     array(
                         array('x', 'y')
                     )
@@ -163,14 +163,14 @@ class OperationFacadeTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(
             new Transformation\CreateAndOverwriteTransformer(
                 new Factories\PrototypeFactory(array()),
-                new Overwriting\KeyPathPairsOverwriter(
+                new Overwriting\KeyPathMapOverwriter(
                     array(
                         array('x', 'y')
                     )
                 )
             ),
             OperationFacade::createTransformer(
-                'keyPathPairs',
+                'keyPathMap',
                 array(
                     array('x', 'y')
                 )

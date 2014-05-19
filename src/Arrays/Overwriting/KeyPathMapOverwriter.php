@@ -12,31 +12,32 @@ use InvalidArgumentException;
 use LengthException;
 
 /**
- * Overwriter which uses pairs of key paths in the array form:
+ * Overwriter which uses key path map in the form of an array:
  *    <code>
  *    [
- *        [inputKeyPath, outputKeypath],
+ *        inputKeyPath  => outputKeypath,
+ *        ...
+ *    ]
+ *    </code>
+ *
+ * or
+ *    <code>
+ *    [
+ *        inputKeyPath  => [outputKeypath1, outputKeyPath2],
  *        ...
  *    ]
  *    </code>
  * 
- * Paths can be either arrays of scalars:
+ * Paths must be strings containing keys combined using separator (default is dot)
+ *
  *    <code>
  *    [
- *        [['users', 0, 'id'], ['user', 'id']],
+ *        'users.0.id'  => 'user.id',
  *        ...
  *    ]
  *    </code>
  *
- * or strings containing combined path with separator (default is dot)
- *    <code>
- *    [
- *        ['users.0.id', 'user.id'],
- *        ...
- *    ]
- *    </code>
- *
- * Both forms are equivalent and will tell the overwriter to put value of
+ * This will tell the overwriter to put value of
  * $input['users'][0]['id'] into $output['user']['id']
  *
  * Only values at requested key paths are used, others are ignored.
@@ -45,8 +46,8 @@ use LengthException;
  * are duplicated, example:
  *    <code>
  *    [
- *        ['input.first', 'output.first'],
- *        ['input.second', 'output.first']
+ *        'input.first'     => 'output.first',
+ *        'input.second'    => 'output.first'
  *    ]
  *    </code>
  * 
@@ -55,12 +56,17 @@ use LengthException;
  * @see ArrayUtil::getElementByKeyPath
  * @see ArrayUtil::setElementByKeyPath
  */
-class KeyPathPairsOverwriter implements Overwriter
+class KeyPathMapOverwriter implements Overwriter
 {
     /**
+     * Internal representation of key paths in the form of an array: [
+     *     ['input', 'key', 'path'], [['output', 'key', 'path'], ['output', 'key', 'path2'], ...],
+     *     ...
+     * ]
+     *
      * @var array
      */
-    protected $keyPathPairs;
+    protected $keyPaths;
     
     /**
      * @var array
@@ -77,20 +83,20 @@ class KeyPathPairsOverwriter implements Overwriter
      * - omitNonExisting        [bool]                  When true, values at non existing source keys will omitted
      *                                                   (no value at destination keys will be set, instead of default)
      *                                                  Overwrites 'throwOnNonExisting'. Default: false.
-     * @param   array           $keyPathPairs
+     * @param   array           $keyPathMap
      * @param   array           $settings
      *
      * @throws  LogicException  on invalid arguments
      */
     public function __construct(
-        array $keyPathPairs,
+        array $keyPathMap,
         array $settings = array()
     )
     {
         // settings must be set before key path pairs, because string paths
         // get transformed to arrays using keySeparator setting
         $this->setSettings($settings);
-        $this->setKeyPathPairs($keyPathPairs);
+        $this->setKeyPaths($keyPathMap);
     }
     
     /**
@@ -104,37 +110,46 @@ class KeyPathPairsOverwriter implements Overwriter
         $options = $this->settings;
         $omitNonExisting = $options['omitNonExisting'];
         
-        foreach ($this->keyPathPairs as $keyPathPair) {
-            list ($inputKeyPath, $outputKeyPath) = $keyPathPair;
+        foreach ($this->keyPaths as $keyPathPair) {
+            list ($inputKeyPath, $outputKeyPaths) = $keyPathPair;
             
             if ($omitNonExisting) {
                 list ($element, $exists) = ArrayUtil::getElementByKeyPath($input, $inputKeyPath, $options);
                 
-                if ($exists) {
-                    ArrayUtil::setElementByKeyPath($output, $outputKeyPath, $element, $options);
+                if (!$exists) {
+                    continue;
                 }
             }
             else {
                 $element = ArrayUtil::getElementByKeyPath($input, $inputKeyPath, $options);
+            }
+            
+            foreach ($outputKeyPaths as $outputKeyPath) {
                 ArrayUtil::setElementByKeyPath($output, $outputKeyPath, $element, $options);
             }
         }
     }
     
-    protected function setKeyPathPairs(array $keyPathPairs)
+    protected function setKeyPaths(array $keyPathMap)
     {
-        $this->validateKeyPathPairs($keyPathPairs);
+        $this->validateKeyPathMap($keyPathMap);
+        $keyPaths = array();
         
-        foreach ($keyPathPairs as $index => $keyPathPair) {
-            list ($inputKeyPath, $outputKeyPath) = $keyPathPair;
+        foreach ($keyPathMap as $inputKeyPath => $outputKeyPaths) {
+            $outputKeyPaths = (array) $outputKeyPaths;
+            $normalizedOutputKeyPaths = array();
             
-            $keyPathPairs[$index] = array(
+            foreach ((array) $outputKeyPaths as $outputKeyPath) {
+                $normalizedOutputKeyPaths[] = ArrayUtil::getKeyPathAsArray($outputKeyPath, $this->settings);
+            }
+            
+            $keyPaths[] = array(
                 ArrayUtil::getKeyPathAsArray($inputKeyPath, $this->settings),
-                ArrayUtil::getKeyPathAsArray($outputKeyPath, $this->settings)
+                $normalizedOutputKeyPaths
             );
         }
         
-        $this->keyPathPairs = $keyPathPairs;
+        $this->keyPaths = $keyPaths;
     }
     
     protected function setSettings(array $settings)
@@ -155,39 +170,34 @@ class KeyPathPairsOverwriter implements Overwriter
         $this->settings = $settings;
     }
     
-    protected function validateKeyPathPairs(array $keyPathPairs)
+    protected function validateKeyPathMap(array $keyPathMap)
     {
-        foreach ($keyPathPairs as $index => $keyPathPair) {
-            if (!is_array($keyPathPair)) {
-                throw new InvalidArgumentException(sprintf(
-                    'Argument $keyPathPairs must be an array of arrays, %s given at index %s.',
-                    TypeUtil::getType($keyPathPair),
-                    $index
-                ));
-            }
+        foreach ($keyPathMap as $inputKeyPath => $outputKeyPath) {
+            $originalOutputKeyPath = $outputKeyPath;
+            $outputKeyPaths = is_array($outputKeyPath)? $outputKeyPath : array($outputKeyPath);
             
-            if (count($keyPathPair) != 2) {
-                throw new LengthException(sprintf(
-                    'Arrays in $keyPathPairs must have exactly 2 elements, %d given at index %s.',
-                    count($keyPathPair),
-                    $index
-                ));
-            }
-            
-            $keyPathPair = array_values($keyPathPair);
-            
-            foreach ($keyPathPair as $keyPathIndex => $keyPath) {
+            foreach ($outputKeyPaths as $index => $outputKeyPath) {
                 try {
-                    ValidationUtil::requireValidKeyPath($keyPath);
+                    ValidationUtil::requireValidKeyPath($outputKeyPath);
                 }
                 catch (LogicException $e) {
                     $exceptionClass = get_class($e);
-                    $newMessage = sprintf(
-                        'Invalid value for %s key path at index %s: %s',
-                        $keyPathIndex == 0? 'input' : 'output',
-                        $index,
-                        $e->getMessage()
-                    );
+                    
+                    if (is_array($originalOutputKeyPath)) {
+                        $newMessage = sprintf(
+                            'Invalid output key path for input key path \'%s\'(subindex %s): %s',
+                            $inputKeyPath,
+                            $index,
+                            $e->getMessage()
+                        );
+                    }
+                    else {
+                        $newMessage = sprintf(
+                            'Invalid output key path for input key path \'%s\': %s',
+                            $inputKeyPath,
+                            $e->getMessage()
+                        );
+                    }
                     
                     throw new $exceptionClass($newMessage, $e->getCode(), $e);
                 }

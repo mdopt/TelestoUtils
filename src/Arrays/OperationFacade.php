@@ -9,7 +9,7 @@ abstract class OperationFacade
 {
     protected static $overwriterCreators = array(
         'allKeys'       => array(__CLASS__, 'createAllKeysOverwriter'),
-        'keyPathPairs'  => array(__CLASS__, 'createKeyPathPairsOverwriter'),
+        'keyPathMap'    => array(__CLASS__, 'createKeyPathMapOverwriter'),
         'composite'     => array(__CLASS__, 'createCompositeOverwriter')
     );
     
@@ -129,9 +129,9 @@ abstract class OperationFacade
         return new Overwriting\AllKeysOverwriter();
     }
     
-    protected static function createKeyPathPairsOverwriter()
+    protected static function createKeyPathMapOverwriter()
     {
-        return TypeUtil::createObject('Telesto\Utils\Arrays\Overwriting\KeyPathPairsOverwriter', func_get_args());
+        return TypeUtil::createObject('Telesto\Utils\Arrays\Overwriting\KeyPathMapOverwriter', func_get_args());
     }
     
     protected static function createCompositeOverwriter()

@@ -171,7 +171,7 @@ class OperationFacadeTest extends \PHPUnit_Framework_TestCase
         $expectedArguments = array(10, 20);
         
         $creator = function () use ($mockOverwriter, $test, $expectedArguments) {
-            $this->assertSame($expectedArguments, func_get_args());
+            $test->assertSame($expectedArguments, func_get_args());
             return $mockOverwriter;
         };
         
@@ -199,7 +199,7 @@ class OperationFacadeTest extends \PHPUnit_Framework_TestCase
         $expectedArguments = array(100, 200);
         
         $creator = function () use ($mockTransformer, $test, $expectedArguments) {
-            $this->assertSame($expectedArguments, func_get_args());
+            $test->assertSame($expectedArguments, func_get_args());
             return $mockTransformer;
         };
         

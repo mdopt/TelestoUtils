@@ -59,11 +59,12 @@ class KeyPathMapOverwriterTest extends \PHPUnit_Framework_TestCase
         array $input,
         array $output,
         array $keyPathMap,
-        array $settings = array()
+        array $defaultOptions = array(),
+        array $options = array()
     )
     {
-        $overwriter = new KeyPathMapOverwriter($keyPathMap, $settings);
-        $overwriter->overwrite($input, $output);
+        $overwriter = new KeyPathMapOverwriter($keyPathMap, $defaultOptions);
+        $overwriter->overwrite($input, $output, $options);
         
         $this->assertSame($expectedOutput, $output);
     }
@@ -96,6 +97,22 @@ class KeyPathMapOverwriterTest extends \PHPUnit_Framework_TestCase
                 array(),
                 array(
                     'database.host'     => array('x', 'y')
+                )
+            ),
+            array(
+                array(
+                    'y'                 => 10,
+                ),
+                array(),
+                array(),
+                array(
+                    'x'                 => 'y'
+                ),
+                array(
+                    'default'           => 100
+                ),
+                array(
+                    'default'           => 10 // should overwrite defaultOptions
                 )
             ),
             array(
@@ -138,7 +155,7 @@ class KeyPathMapOverwriterTest extends \PHPUnit_Framework_TestCase
                     'non_existing_key2' => 'level1.level2.level3'
                 ),
                 array(
-                    'throwOnNonExisting'=> false,
+                    'throwOnNonExisting'=> true,
                     'omitNonExisting'   => true // should overwrite throwOnNonExisting
                 )
             ),
@@ -156,8 +173,28 @@ class KeyPathMapOverwriterTest extends \PHPUnit_Framework_TestCase
                     'non_existing_key2' => 'level1.level2.level3'
                 ),
                 array(
-                    'throwOnNonExisting'=> false,
+                    'throwOnNonExisting'=> true,
                     'omitNonExisting'   => true // should overwrite throwOnNonExisting
+                )
+            ),
+            array(
+                array(
+                    'db_host'           => 'localhost',
+                    'db_user'           => 'root',
+                ),
+                $exampleArray,
+                array(),
+                array(
+                    'database.host'     => 'db_host',
+                    'database.user'     => 'db_user',
+                    'non_existing_key'  => 'new_value',
+                    'non_existing_key2' => 'level1.level2.level3'
+                ),
+                array(
+                    'omitNonExisting'   => false
+                ),
+                array(
+                    'omitNonExisting'   => true // should overwrite defaultOptions
                 )
             ),
             array(
@@ -198,10 +235,10 @@ class KeyPathMapOverwriterTest extends \PHPUnit_Framework_TestCase
         $input,
         $output,
         array $keyPathMap,
-        array $settings = array()
+        array $defaultOptions = array()
     )
     {
-        $overwriter = new KeyPathMapOverwriter($keyPathMap, $settings);
+        $overwriter = new KeyPathMapOverwriter($keyPathMap, $defaultOptions);
         $overwriter->overwrite($input, $output);
         
         // can't compare objects using assertSame
@@ -258,7 +295,6 @@ class KeyPathMapOverwriterTest extends \PHPUnit_Framework_TestCase
         );
     }
     
-    
     /**
      * @dataProvider provideOverwriteExceptionsData
      */
@@ -267,7 +303,8 @@ class KeyPathMapOverwriterTest extends \PHPUnit_Framework_TestCase
         array $input,
         array $output,
         array $keyPathMap,
-        array $settings = array()
+        array $defaultOptions = array(),
+        array $options = array()
     )
     {
         $this->setExpectedException(
@@ -275,8 +312,8 @@ class KeyPathMapOverwriterTest extends \PHPUnit_Framework_TestCase
             $expectedException[1]
         );
         
-        $overwriter = new KeyPathMapOverwriter($keyPathMap, $settings);
-        $overwriter->overwrite($input, $output);
+        $overwriter = new KeyPathMapOverwriter($keyPathMap, $defaultOptions);
+        $overwriter->overwrite($input, $output, $options);
     }
     
     public function provideOverwriteExceptionsData()
@@ -312,6 +349,37 @@ class KeyPathMapOverwriterTest extends \PHPUnit_Framework_TestCase
                 ),
                 array(
                     'throwOnCollision'      => true
+                )
+            ),
+            array(
+                array(
+                    'RuntimeException',
+                    ''
+                ),
+                $exampleArray,
+                array(),
+                array(
+                    'database.host'         => 'db.host',
+                    'database.user'         => 'db.host.0'
+                ),
+                array(),
+                array(
+                    'throwOnCollision'      => true
+                )
+            ),
+            array(
+                array(
+                    'InvalidArgumentException',
+                    ''
+                ),
+                array(),
+                array(),
+                array(
+                    'database.host'         => 'db.host'
+                ),
+                array(),
+                array(
+                    'arrayPrototype'        => new \stdClass
                 )
             )
         );

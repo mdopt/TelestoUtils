@@ -54,7 +54,8 @@ abstract class OperationFacade
     }
     
     /**
-     * @param   string      $name
+     * @param   string              $name
+     * @param   mixed               $arg1, ...
      *
      * @return  Overwriting\Overwriter
      */
@@ -69,9 +70,10 @@ abstract class OperationFacade
     }
     
     /**
-     * @param   string      $name
+     * @param   string              $name
+     * @param   mixed               $arg1, ...
      *
-     * @return  Transformer
+     * @return  Transformation\Transformer
      */
     public static function createTransformer($name)
     {
@@ -93,6 +95,7 @@ abstract class OperationFacade
      * @param   array|\ArrayAccess  $array
      * @param   array|\ArrayAccess  $outputArray
      * @param   string              $operationName
+     * @param   mixed               $arg1, ...
      *
      * @return  void
      */
@@ -110,6 +113,7 @@ abstract class OperationFacade
     /**
      * @param   array|\ArrayAccess  $array
      * @param   string              $operationName
+     * @param   mixed               $arg1, ...
      *
      * @return  array|\ArrayAccess
      */

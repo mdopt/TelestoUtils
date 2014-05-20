@@ -71,10 +71,19 @@ class KeyPathMapOverwriter implements Overwriter
     /**
      * @var array
      */
-    protected $settings;
+    protected $defaultOptions;
     
     /**
-     * $settings:
+     * These options can be changed for a particular operation
+     *
+     * @var array
+     */
+    protected static $perOperationOptions = array(
+        'default', 'throwOnNonExisting', 'throwOnCollision', 'arrayPrototype', 'omitNonExisting'
+    );
+    
+    /**
+     * $defaultOptions:
      * - default                [mixed]                 see ArrayUtil::getElementByKeyPath
      * - keySeparator           [string]                see ArrayUtil::getElementByKeyPath
      * - throwOnNonExisting     [bool]                  see ArrayUtil::getElementByKeyPath
@@ -84,48 +93,64 @@ class KeyPathMapOverwriter implements Overwriter
      *                                                   (no value at destination keys will be set, instead of default)
      *                                                  Overwrites 'throwOnNonExisting'. Default: false.
      * @param   array           $keyPathMap
-     * @param   array           $settings
+     * @param   array           $defaultOptions
      *
      * @throws  LogicException  on invalid arguments
      */
     public function __construct(
         array $keyPathMap,
-        array $settings = array()
+        array $defaultOptions = array()
     )
     {
-        // settings must be set before key path pairs, because string paths
+        // Default options must be set before key path pairs, because string paths
         // get transformed to arrays using keySeparator setting
-        $this->setSettings($settings);
+        $this->setDefaultOptions($defaultOptions);
         $this->setKeyPaths($keyPathMap);
     }
     
     /**
      * {@inheritdoc}
      */
-    public function overwrite($input, &$output)
+    public function overwrite($input, &$output, array $options = array())
     {
         ValidationUtil::requireArrayOrArrayAccess($input, '$input');
         ValidationUtil::requireArrayOrArrayAccess($output, '$output');
+        ValidationUtil::requireValidOptions($options, array('arrayPrototype'));
         
-        $options = $this->settings;
-        $omitNonExisting = $options['omitNonExisting'];
+        $realOptions = array_merge(
+            $this->defaultOptions,
+            array_intersect_key(
+                $options,
+                array_flip(static::$perOperationOptions)
+            )
+        );
+        
+        $omitNonExisting = !empty($realOptions['omitNonExisting']);
+        
+        if ($omitNonExisting) {
+            $realOptions['throwOnNonExisting'] = false;
+            $realOptions['returnMode']  = ReturnMode::BOTH;
+        }
+        else {
+            $realOptions['returnMode']  = ReturnMode::ELEMENT_ONLY;
+        }
         
         foreach ($this->keyPaths as $keyPathPair) {
             list ($inputKeyPath, $outputKeyPaths) = $keyPathPair;
             
             if ($omitNonExisting) {
-                list ($element, $exists) = ArrayUtil::getElementByKeyPath($input, $inputKeyPath, $options);
+                list ($element, $exists) = ArrayUtil::getElementByKeyPath($input, $inputKeyPath, $realOptions);
                 
                 if (!$exists) {
                     continue;
                 }
             }
             else {
-                $element = ArrayUtil::getElementByKeyPath($input, $inputKeyPath, $options);
+                $element = ArrayUtil::getElementByKeyPath($input, $inputKeyPath, $realOptions);
             }
             
             foreach ($outputKeyPaths as $outputKeyPath) {
-                ArrayUtil::setElementByKeyPath($output, $outputKeyPath, $element, $options);
+                ArrayUtil::setElementByKeyPath($output, $outputKeyPath, $element, $realOptions);
             }
         }
     }
@@ -140,11 +165,11 @@ class KeyPathMapOverwriter implements Overwriter
             $normalizedOutputKeyPaths = array();
             
             foreach ((array) $outputKeyPaths as $outputKeyPath) {
-                $normalizedOutputKeyPaths[] = ArrayUtil::getKeyPathAsArray($outputKeyPath, $this->settings);
+                $normalizedOutputKeyPaths[] = ArrayUtil::getKeyPathAsArray($outputKeyPath, $this->defaultOptions);
             }
             
             $keyPaths[] = array(
-                ArrayUtil::getKeyPathAsArray($inputKeyPath, $this->settings),
+                ArrayUtil::getKeyPathAsArray($inputKeyPath, $this->defaultOptions),
                 $normalizedOutputKeyPaths
             );
         }
@@ -152,22 +177,15 @@ class KeyPathMapOverwriter implements Overwriter
         $this->keyPaths = $keyPaths;
     }
     
-    protected function setSettings(array $settings)
+    protected function setDefaultOptions(array $defaultOptions)
     {
-        $this->validateSettings($settings);
+        $this->validateOptions($defaultOptions);
         
-        // These settings should be hardcoded
-        $settings['omitValidation']     = true;
-        $settings['omitNonExisting']    = !empty($settings['omitNonExisting']);
+        // This option should be hardcoded.
+        // We don't need ArrayUtil validation (this class does it's own)
+        $defaultOptions['omitValidation']   = true;
         
-        if ($settings['omitNonExisting']) {
-            $settings['returnMode']     = ReturnMode::BOTH;
-        }
-        else {
-            $settings['returnMode']     = ReturnMode::ELEMENT_ONLY;
-        }
-        
-        $this->settings = $settings;
+        $this->defaultOptions = $defaultOptions;
     }
     
     protected function validateKeyPathMap(array $keyPathMap)
@@ -205,8 +223,8 @@ class KeyPathMapOverwriter implements Overwriter
         }
     }
     
-    protected function validateSettings(array $settings)
+    protected function validateOptions(array $options)
     {
-        ValidationUtil::requireValidOptions($settings, array('keySeparator', 'arrayPrototype'));
+        ValidationUtil::requireValidOptions($options, array('keySeparator', 'arrayPrototype'));
     }
 }

@@ -16,7 +16,7 @@ class AllKeysOverwriter implements Overwriter
     /**
      * {@inheritdoc}
      */
-    public function overwrite($input, &$output)
+    public function overwrite($input, &$output, array $options = array())
     {
         ValidationUtil::requireArrayOrArrayAccess($input, '$input');
         ValidationUtil::requireArrayOrArrayAccess($output, '$output');

@@ -40,12 +40,12 @@ class CreateAndOverwriteTransformer implements Transformer
     /**
      * {@inheritdoc}
      */
-    public function transform($input)
+    public function transform($input, array $options = array())
     {
         ValidationUtil::requireArrayOrArrayAccess($input, '$input');
         
         $output = $this->factory->createArray();
-        $this->overwriter->overwrite($input, $output);
+        $this->overwriter->overwrite($input, $output, $options);
         
         return $output;
     }

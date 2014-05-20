@@ -37,10 +37,10 @@ class CompositeOverwriter implements Overwriter
     /**
      * {@inheritdoc}
      */
-    public function overwrite($input, &$output)
+    public function overwrite($input, &$output, array $options = array())
     {
         foreach ($this->overwriters as $overwriter) {
-            $overwriter->overwrite($input, $output);
+            $overwriter->overwrite($input, $output, $options);
         }
     }
 }

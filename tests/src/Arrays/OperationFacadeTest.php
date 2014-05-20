@@ -131,31 +131,6 @@ class OperationFacadeTest extends \PHPUnit_Framework_TestCase
                 )
             )
         );
-        
-        $this->assertEquals(
-            new Overwriting\CompositeOverwriter(
-                array(
-                    new Overwriting\AllKeysOverwriter,
-                    new Overwriting\KeyPathMapOverwriter(
-                        array(
-                            array('x', 'y')
-                        )
-                    )
-                )
-            ),
-            OperationFacade::createOverwriter(
-                'composite',
-                array(
-                    'allKeys'
-                ),
-                array(
-                    'keyPathMap',
-                    array(
-                        array('x', 'y')
-                    )
-                )
-            )
-        );
     }
     
     public function testCreateTransformer()

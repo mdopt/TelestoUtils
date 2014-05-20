@@ -10,6 +10,7 @@ use ArrayAccess;
 use InvalidArgumentException;
 use RuntimeException;
 use LengthException;
+use LogicException;
 
 abstract class ArrayUtil
 {

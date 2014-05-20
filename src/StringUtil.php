@@ -31,7 +31,7 @@ abstract class StringUtil
         $string = (string) $string;
         $limit = is_null($limit)? null : (int) $limit;
         
-        $escapeChar = array_key_exists('escapeChar', $options)? $options['escapeChar'] : null;
+        $escapeChar = isset($options['escapeChar'])? $options['escapeChar'] : null;
         $escapeChar = is_null($escapeChar)? null : (string) $escapeChar;
         
         static::validateImplodeExplodeEscapeChar($escapeChar, $delimiter);

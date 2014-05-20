@@ -11,7 +11,7 @@ abstract class TypeUtil
      * Types that can be checked easily with is_* function
      */
     protected static $basicTypes = array(
-        'bool', 'int', 'float', 'string', 'array', 'scalar',
+        'bool', 'int', 'integer', 'float', 'string', 'array', 'scalar',
         'null', 'object', 'callable', 'resource'
     );
     

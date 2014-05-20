@@ -110,6 +110,11 @@ class TypeUtilTest extends \PHPUnit_Framework_TestCase
             ),
             array(
                 true,
+                10,
+                'integer'
+            ),
+            array(
+                true,
                 null,
                 'int|null'
             ),

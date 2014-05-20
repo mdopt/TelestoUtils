@@ -2,6 +2,9 @@
 
 namespace Telesto\Utils;
 
+use InvalidArgumentException;
+use UnexpectedValueException;
+
 abstract class CommonUtil
 {
     /**

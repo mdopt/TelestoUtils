@@ -37,18 +37,6 @@ abstract class TypeUtil
     }
     
     /**
-     * @param   string  $className
-     * @param   array   $arguments
-     *
-     * @return  object
-     */
-    public static function createObject($className, array $arguments = array())
-    {
-        $reflectionClass = new \ReflectionClass($className);
-        return $reflectionClass->newInstanceArgs($arguments);
-    }
-    
-    /**
      * @param   mixed   $input
      *
      * @return  string

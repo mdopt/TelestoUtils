@@ -3,6 +3,7 @@
 namespace Telesto\Utils\Arrays;
 
 use Telesto\Utils\TypeUtil;
+use Telesto\Utils\CommonUtil;
 use LogicException;
 
 abstract class OperationFacade
@@ -134,6 +135,6 @@ abstract class OperationFacade
     
     protected static function createCopyKeyPathMapOverwriter()
     {
-        return TypeUtil::createObject('Telesto\Utils\Arrays\Overwriting\Copy\KeyPathMapOverwriter', func_get_args());
+        return CommonUtil::createObject('Telesto\Utils\Arrays\Overwriting\Copy\KeyPathMapOverwriter', func_get_args());
     }
 }

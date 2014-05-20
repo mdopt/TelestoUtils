@@ -50,4 +50,16 @@ abstract class CommonUtil
         
         return (string) $var;
     }
+    
+    /**
+     * @param   string  $className
+     * @param   array   $arguments
+     *
+     * @return  object
+     */
+    public static function createObject($className, array $arguments = array())
+    {
+        $reflectionClass = new \ReflectionClass($className);
+        return $reflectionClass->newInstanceArgs($arguments);
+    }
 }

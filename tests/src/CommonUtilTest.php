@@ -55,4 +55,33 @@ class CommonUtilTest extends \PHPUnit_Framework_TestCase
             )
         );
     }
+    
+    /**
+     * @dataProvider provideCreateObjectData
+     */
+    public function testCreateObject($expectedResult, $className, $arguments)
+    {
+        $this->assertEquals($expectedResult, CommonUtil::createObject($className, $arguments));
+    }
+    
+    public function provideCreateObjectData()
+    {
+        return array(
+            array(
+                new \DateTime('2014-04-20 14:12:32'),
+                'DateTime',
+                array(
+                    '2014-04-20 14:12:32'
+                )
+            ),
+            array(
+                new \InvalidArgumentException('Message', 10),
+                'InvalidArgumentException',
+                array(
+                    'Message',
+                    10
+                )
+            )
+        );
+    }
 }

@@ -1,8 +1,8 @@
 <?php
 
-namespace Telesto\Utils\Tests\Arrays\Overwriting;
+namespace Telesto\Utils\Tests\Arrays\Overwriting\Copy;
 
-use Telesto\Utils\Arrays\Overwriting\AllKeysOverwriter;
+use Telesto\Utils\Arrays\Overwriting\Copy\AllKeysOverwriter;
 
 class AllKeysOverwriterTest extends \PHPUnit_Framework_TestCase
 {

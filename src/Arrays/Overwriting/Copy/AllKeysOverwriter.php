@@ -1,7 +1,8 @@
 <?php
 
-namespace Telesto\Utils\Arrays\Overwriting;
+namespace Telesto\Utils\Arrays\Overwriting\Copy;
 
+use Telesto\Utils\Arrays\Overwriting\Overwriter;
 use Telesto\Utils\Arrays\ValidationUtil;
 use Telesto\Utils\TypeUtil;
 

@@ -1,8 +1,8 @@
 <?php
 
-namespace Telesto\Utils\Tests\Arrays\Overwriting;
+namespace Telesto\Utils\Tests\Arrays\Overwriting\Copy;
 
-use Telesto\Utils\Arrays\Overwriting\KeyPathMapOverwriter;
+use Telesto\Utils\Arrays\Overwriting\Copy\KeyPathMapOverwriter;
 
 use ArrayObject;
 

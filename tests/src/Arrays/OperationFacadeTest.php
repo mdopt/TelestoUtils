@@ -21,8 +21,8 @@ class OperationFacadeTest extends \PHPUnit_Framework_TestCase
             return $mockOverwriter;
         };
         
-        OperationFacade::registerOverwriterCreator('test.allKeys2', $creator);
-        $this->assertSame($mockOverwriter, OperationFacade::createOverwriter('test.allKeys2', 10, 20));
+        OperationFacade::registerOverwriterCreator('test.operation1', $creator);
+        $this->assertSame($mockOverwriter, OperationFacade::createOverwriter('test.operation1', 10, 20));
     }
     
     /**
@@ -44,9 +44,9 @@ class OperationFacadeTest extends \PHPUnit_Framework_TestCase
             array(
                 array(
                     'LogicException',
-                    'Overwriter creator \'allKeys\' is already registered.'
+                    'Overwriter creator \'copy.allKeys\' is already registered.'
                 ),
-                'allKeys',
+                'copy.allKeys',
                 function () {}
             ),
             array(
@@ -72,8 +72,8 @@ class OperationFacadeTest extends \PHPUnit_Framework_TestCase
             return $mockTransformer;
         };
         
-        OperationFacade::registerOverwriterCreator('test.allKeys3', $creator);
-        $this->assertSame($mockTransformer, OperationFacade::createOverwriter('test.allKeys3', 'x', 'y'));
+        OperationFacade::registerOverwriterCreator('test.operation2', $creator);
+        $this->assertSame($mockTransformer, OperationFacade::createOverwriter('test.operation2', 'x', 'y'));
     }
     
     /**
@@ -95,9 +95,9 @@ class OperationFacadeTest extends \PHPUnit_Framework_TestCase
             array(
                 array(
                     'LogicException',
-                    'Transformer creator \'allKeys\' is already registered.'
+                    'Transformer creator \'copy.allKeys\' is already registered.'
                 ),
-                'allKeys',
+                'copy.allKeys',
                 function () {}
             ),
             array(
@@ -114,18 +114,18 @@ class OperationFacadeTest extends \PHPUnit_Framework_TestCase
     public function testCreateOverwriter()
     {
         $this->assertEquals(
-            new Overwriting\AllKeysOverwriter,
-            OperationFacade::createOverwriter('allKeys')
+            new Overwriting\Copy\AllKeysOverwriter,
+            OperationFacade::createOverwriter('copy.allKeys')
         );
         
         $this->assertEquals(
-            new Overwriting\KeyPathMapOverwriter(
+            new Overwriting\Copy\KeyPathMapOverwriter(
                 array(
                     array('x', 'y')
                 )
             ),
             OperationFacade::createOverwriter(
-                'keyPathMap',
+                'copy.byKeyPathMap',
                 array(
                     array('x', 'y')
                 )
@@ -138,14 +138,14 @@ class OperationFacadeTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(
             new Transformation\CreateAndOverwriteTransformer(
                 new Factories\PrototypeFactory(array()),
-                new Overwriting\KeyPathMapOverwriter(
+                new Overwriting\Copy\KeyPathMapOverwriter(
                     array(
                         array('x', 'y')
                     )
                 )
             ),
             OperationFacade::createTransformer(
-                'keyPathMap',
+                'copy.byKeyPathMap',
                 array(
                     array('x', 'y')
                 )
@@ -175,8 +175,8 @@ class OperationFacadeTest extends \PHPUnit_Framework_TestCase
             return $mockOverwriter;
         };
         
-        OperationFacade::registerOverwriterCreator('test.overwrite.operation', $creator);
-        OperationFacade::overwrite($input, $output, 'test.overwrite.operation', 10, 20);
+        OperationFacade::registerOverwriterCreator('test.overwrite.operation3', $creator);
+        OperationFacade::overwrite($input, $output, 'test.overwrite.operation3', 10, 20);
     }
     
     public function testTransform()
@@ -203,7 +203,7 @@ class OperationFacadeTest extends \PHPUnit_Framework_TestCase
             return $mockTransformer;
         };
         
-        OperationFacade::registerTransformerCreator('test.transform.operation', $creator);
-        $this->assertSame($output, OperationFacade::transform($input, 'test.transform.operation', 100, 200));
+        OperationFacade::registerTransformerCreator('test.transform.operation4', $creator);
+        $this->assertSame($output, OperationFacade::transform($input, 'test.transform.operation4', 100, 200));
     }
 }

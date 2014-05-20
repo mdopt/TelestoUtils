@@ -8,8 +8,8 @@ use LogicException;
 abstract class OperationFacade
 {
     protected static $overwriterCreators = array(
-        'allKeys'       => array(__CLASS__, 'createAllKeysOverwriter'),
-        'keyPathMap'    => array(__CLASS__, 'createKeyPathMapOverwriter')
+        'copy.allKeys'      => array(__CLASS__, 'createCopyAllKeysOverwriter'),
+        'copy.byKeyPathMap' => array(__CLASS__, 'createCopyKeyPathMapOverwriter')
     );
     
     protected static $transformerCreators = array();
@@ -127,13 +127,13 @@ abstract class OperationFacade
         return $transformer->transform($array);
     }
     
-    protected static function createAllKeysOverwriter()
+    protected static function createCopyAllKeysOverwriter()
     {
-        return new Overwriting\AllKeysOverwriter();
+        return new Overwriting\Copy\AllKeysOverwriter();
     }
     
-    protected static function createKeyPathMapOverwriter()
+    protected static function createCopyKeyPathMapOverwriter()
     {
-        return TypeUtil::createObject('Telesto\Utils\Arrays\Overwriting\KeyPathMapOverwriter', func_get_args());
+        return TypeUtil::createObject('Telesto\Utils\Arrays\Overwriting\Copy\KeyPathMapOverwriter', func_get_args());
     }
 }

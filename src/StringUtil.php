@@ -174,7 +174,7 @@ abstract class StringUtil
      * of a substring in a string
      *
      * <code>
-     *  StringUtil::substrConsecutiveCount(' x xxx x xx', 'x'); // returns [1, 3, 1, 2]
+     *  StringUtil::substrConsecutiveCounts(' x xxx x xx', 'x'); // returns [1, 3, 1, 2]
      * </code>
      * 
      * @param   string      $haystack
@@ -184,7 +184,7 @@ abstract class StringUtil
      *
      * @return  array
      */
-    public static function substrConsecutiveCount($haystack, $needle, $offset = 0, $length = null)
+    public static function substrConsecutiveCounts($haystack, $needle, $offset = 0, $length = null)
     {
         $positions = static::strposAll($haystack, $needle, $offset, $length);
         
@@ -232,7 +232,7 @@ abstract class StringUtil
      */
     public static function substrMaxConsecutiveCount($haystack, $needle, $offset = 0, $length = null)
     {
-        return max(static::substrConsecutiveCount($haystack, $needle, $offset, $length));
+        return max(static::substrConsecutiveCounts($haystack, $needle, $offset, $length));
     }
     
     protected static function validateImplodeExplodeEscapeChar($escapeChar, $delimiter, $delimiterName = 'delimiter')

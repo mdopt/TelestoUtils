@@ -462,14 +462,14 @@ class StringUtilTest extends \PHPUnit_Framework_TestCase
     }
     
     /**
-     * @dataProvider provideSubstrConsecutiveCountData
+     * @dataProvider provideSubstrConsecutiveCountsData
      */
-    public function testSubstrConsecutiveCount($expectedResult, $haystack, $needle, $offset = 0, $length = null)
+    public function testSubstrConsecutiveCounts($expectedResult, $haystack, $needle, $offset = 0, $length = null)
     {
-        $this->assertSame($expectedResult, StringUtil::substrConsecutiveCount($haystack, $needle, $offset, $length));
+        $this->assertSame($expectedResult, StringUtil::substrConsecutiveCounts($haystack, $needle, $offset, $length));
     }
     
-    public function provideSubstrConsecutiveCountData()
+    public function provideSubstrConsecutiveCountsData()
     {
         return array(
             array(
@@ -549,19 +549,19 @@ class StringUtilTest extends \PHPUnit_Framework_TestCase
     }
     
     /**
-     * @dataProvider provideSubstrConsecutiveCountExceptionsData
+     * @dataProvider provideSubstrConsecutiveCountsExceptionsData
      */
-    public function testSubstrConsecutiveCountExceptions(array $expectedException, $haystack, $needle, $offset = 0, $length = null)
+    public function testSubstrConsecutiveCountsExceptions(array $expectedException, $haystack, $needle, $offset = 0, $length = null)
     {
         $this->setExpectedException(
             $expectedException[0],
             $expectedException[1]
         );
         
-        StringUtil::substrConsecutiveCount($haystack, $needle, $offset, $length);
+        StringUtil::substrConsecutiveCounts($haystack, $needle, $offset, $length);
     }
     
-    public function provideSubstrConsecutiveCountExceptionsData()
+    public function provideSubstrConsecutiveCountsExceptionsData()
     {
         return array(
             array(

@@ -27,10 +27,6 @@ abstract class StringUtil
      */
     public static function explode($delimiter, $string, $limit = null, array $options = array())
     {
-        $delimiter = (string) $delimiter;
-        $string = (string) $string;
-        $limit = is_null($limit)? null : (int) $limit;
-        
         $escapeChar = isset($options['escapeChar'])? $options['escapeChar'] : null;
         $escapeChar = is_null($escapeChar)? null : (string) $escapeChar;
         
@@ -103,8 +99,6 @@ abstract class StringUtil
      */
     public static function implode($glue, array $pieces, array $options = array())
     {
-        $glue = (string) $glue;
-        
         $escapeChar = array_key_exists('escapeChar', $options)? $options['escapeChar'] : null;
         $escapeChar = is_null($escapeChar)? null : (string) $escapeChar;
         
@@ -125,6 +119,56 @@ abstract class StringUtil
     }
     
     /**
+     * Finds the positions of all occurrences of a substring in a string.
+     *
+     * <code>
+     *  StringUtil::strposAll(' x xx x', 'x'); // returns [1, 3, 4, 6]
+     * </code>
+     *
+     * @param   string      $haystack
+     * @param   string      $needle
+     * @param   int         $offset
+     * @param   int|null    $length
+     *
+     * @return  array
+     */
+    public static function strposAll($haystack, $needle, $offset = 0, $length = null)
+    {
+        $boundary = is_null($length)? null : $offset + $length;
+        $needleLen = strlen($needle);
+        $haystackLen = strlen($haystack);
+        
+        if ($needleLen === 0) {
+            throw new InvalidArgumentException('Needle cannot be an empty string.');
+        }
+        
+        if (!is_null($boundary) && $boundary > $haystackLen) {
+            throw new InvalidArgumentException(
+                sprintf('Offset + length(%d) is greater than haystack length(%d).', $boundary, $haystackLen)
+            );
+        }
+        
+        $currentOffset = $offset;
+        $positions = array();
+        
+        while (true) {
+            $position = strpos($haystack, $needle, $currentOffset);
+            
+            if (
+                $position === false
+                || (!is_null($boundary) && $position + $needleLen > $boundary)
+            ) {                
+                break;
+            }
+            
+            $positions[] = $position;
+            $currentOffset = $position + $needleLen;
+        }
+        
+        return $positions;
+    }
+    
+    /**
      * Returns an array containing the numbers of consecutive occurences
      * of a substring in a string
      *
@@ -141,54 +185,31 @@ abstract class StringUtil
      */
     public static function substrConsecutiveCount($haystack, $needle, $offset = 0, $length = null)
     {
-        $haystack = (string) $haystack;
-        $needle = (string) $needle;
-        $offset = (int) $offset;
-        $length = is_null($length)? null : (int) $length;
-        $boundary = is_null($length)? null : $offset + $length;
+        $positions = static::strposAll($haystack, $needle, $offset, $length);
         
         $needleLen = strlen($needle);
-        $haystackLen = strlen($haystack);
-        
-        if ($needleLen === 0) {
-            throw new InvalidArgumentException('Needle cannot be an empty string.');
-        }
-        
-        if (!is_null($boundary) && $boundary > $haystackLen) {
-            throw new InvalidArgumentException(
-                sprintf('Offset + length(%d) is greater than haystack length(%d).', $boundary, $haystackLen)
-            );
-        }
-        
-        $currentOffset = $offset;
-        $lastPosition = null;
         $consecutiveCount = 0;
         $countArray = array();
+        $previousPosition = null;
+        $lastIndex = count($positions) - 1;
         
-        while (true) {
-            $position = strpos($haystack, $needle, $currentOffset);
-            
-            if (
-                $position === false
-                || (!is_null($boundary) && $position + $needleLen > $boundary)
-            ) {
+        foreach ($positions as $index => $position) {
+            if (is_null($previousPosition) || $position === $previousPosition + $needleLen) {
+                ++$consecutiveCount;
+            }
+            else {
                 if ($consecutiveCount > 0) {
                     $countArray[] = $consecutiveCount;
                 }
                 
-                break;
-            }
-            
-            if (is_null($lastPosition) || $position === $lastPosition + $needleLen) {
-                ++$consecutiveCount;
-            }
-            else {
-                $countArray[] = $consecutiveCount;
                 $consecutiveCount = 1;
             }
             
-            $lastPosition = $position;
-            $currentOffset = $position + $needleLen;
+            if ($index === $lastIndex && $consecutiveCount > 0) {
+                $countArray[] = $consecutiveCount;
+            }
+            
+            $previousPosition = $position;
         }
         
         return $countArray;

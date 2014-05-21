@@ -287,7 +287,7 @@ abstract class ArrayUtil
      *
      * @return  array
      */
-    public static function getKeyPathAsArray($keyPath, array $options)
+    public static function getKeyPathAsArray($keyPath, array $options = array())
     {
         if (!is_array($keyPath)) {
             $keySeparator   = isset($options['keySeparator'])? $options['keySeparator'] : '.';

@@ -390,6 +390,78 @@ class StringUtilTest extends \PHPUnit_Framework_TestCase
     }
     
     /**
+     * @dataProvider provideStrposAllData
+     */
+    public function testStrposAll($expectedResult, $haystack, $needle, $offset = 0, $length = null)
+    {
+        $this->assertSame($expectedResult, StringUtil::strposAll($haystack, $needle, $offset, $length));
+    }
+    
+    public function provideStrposAllData()
+    {
+        return array(
+            array(
+                array(),
+                '     ',
+                '#'
+            ),
+            array(
+                array(
+                    0,
+                    1,
+                    2
+                ),
+                '###',
+                '#'
+            ),
+            array(
+                array(
+                    2,
+                    4
+                ),
+                '  # #',
+                '#'
+            ),
+            array(
+                array(
+                    4
+                ),
+                '    #',
+                '#'
+            ),
+            array(
+                array(
+                    4
+                ),
+                ' @  @@@@ @',
+                '@',
+                3,
+                2
+            ),
+            array(
+                array(
+                    1,
+                    5,
+                    7,
+                    10,
+                    12
+                ),
+                ' --- ---- -----',
+                '--',
+                1
+            ),
+            array(
+                array(
+                    2,
+                    5
+                ),
+                'This is a test',
+                'is',
+            )
+        );
+    }
+    
+    /**
      * @dataProvider provideSubstrConsecutiveCountData
      */
     public function testSubstrConsecutiveCount($expectedResult, $haystack, $needle, $offset = 0, $length = null)
@@ -400,6 +472,11 @@ class StringUtilTest extends \PHPUnit_Framework_TestCase
     public function provideSubstrConsecutiveCountData()
     {
         return array(
+            array(
+                array(),
+                '   ',
+                '@'
+            ),
             array(
                 array(1, 2, 4, 1, 2),
                 '  @ @@ @@@@ @ @@   ',

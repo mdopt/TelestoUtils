@@ -239,7 +239,7 @@ class StringUtilTest extends \PHPUnit_Framework_TestCase
         return array(
             array(
                 array(
-                    'InvalidArgumentException',
+                    'LengthException',
                     'If specified, option \'escapeChar\' must have exactly 1 character, 0 given.'
                 ),
                 '.',
@@ -251,7 +251,7 @@ class StringUtilTest extends \PHPUnit_Framework_TestCase
             ),
             array(
                 array(
-                    'InvalidArgumentException',
+                    'LengthException',
                     'If specified, option \'escapeChar\' must have exactly 1 character, 2 given.'
                 ),
                 '.',
@@ -263,7 +263,7 @@ class StringUtilTest extends \PHPUnit_Framework_TestCase
             ),
             array(
                 array(
-                    'InvalidArgumentException',
+                    'DomainException',
                     'Escape character cannot not be the same as the delimiter or occur in the delimiter.'
                 ),
                 '.',
@@ -275,7 +275,7 @@ class StringUtilTest extends \PHPUnit_Framework_TestCase
             ),
             array(
                 array(
-                    'InvalidArgumentException',
+                    'DomainException',
                     'Escape character cannot not be the same as the delimiter or occur in the delimiter.'
                 ),
                 ' . ',
@@ -366,7 +366,7 @@ class StringUtilTest extends \PHPUnit_Framework_TestCase
         return array(
             array(
                 array(
-                    'InvalidArgumentException',
+                    'LengthException',
                     'If specified, option \'escapeChar\' must have exactly 1 character, 3 given.'
                 ),
                 '.',
@@ -377,7 +377,7 @@ class StringUtilTest extends \PHPUnit_Framework_TestCase
             ),
             array(
                 array(
-                    'InvalidArgumentException',
+                    'DomainException',
                     'Escape character cannot not be the same as the glue or occur in the glue.'
                 ),
                 '.',
@@ -566,7 +566,7 @@ class StringUtilTest extends \PHPUnit_Framework_TestCase
         return array(
             array(
                 array(
-                    'InvalidArgumentException',
+                    'LengthException',
                     'Needle cannot be an empty string.'
                 ),
                 'abc',
@@ -574,7 +574,7 @@ class StringUtilTest extends \PHPUnit_Framework_TestCase
             ),
             array(
                 array(
-                    'InvalidArgumentException',
+                    'LengthException',
                     'Offset + length(10) is greater than haystack length(9).'
                 ),
                 'abcdefghi',

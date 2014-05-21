@@ -2,7 +2,8 @@
 
 namespace Telesto\Utils;
 
-use InvalidArgumentException;
+use LengthException;
+use DomainException;
 
 abstract class StringUtil
 {
@@ -139,11 +140,11 @@ abstract class StringUtil
         $haystackLen = strlen($haystack);
         
         if ($needleLen === 0) {
-            throw new InvalidArgumentException('Needle cannot be an empty string.');
+            throw new LengthException('Needle cannot be an empty string.');
         }
         
         if (!is_null($boundary) && $boundary > $haystackLen) {
-            throw new InvalidArgumentException(
+            throw new LengthException(
                 sprintf('Offset + length(%d) is greater than haystack length(%d).', $boundary, $haystackLen)
             );
         }
@@ -238,12 +239,12 @@ abstract class StringUtil
     {
         if (is_string($escapeChar)) {
             if (strlen($escapeChar) !== 1) {
-                throw new InvalidArgumentException(
+                throw new LengthException(
                     sprintf('If specified, option \'escapeChar\' must have exactly 1 character, %s given.', strlen($escapeChar))
                 );
             }
             else if (strpos($delimiter, $escapeChar) !== false) {
-                throw new InvalidArgumentException(
+                throw new DomainException(
                     sprintf('Escape character cannot not be the same as the %1$s or occur in the %1$s.', $delimiterName)
                 );
             }

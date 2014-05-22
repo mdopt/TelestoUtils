@@ -180,17 +180,12 @@ class TrivialOverwriter implements Overwriter
     
     protected function setDefaultOptions(array $defaultOptions)
     {
-        $this->validateOptions($defaultOptions);
+        ValidationUtil::requireValidOptions($defaultOptions, array('keySeparator', 'arrayPrototype'));
         
         // This option should be hardcoded.
         // We don't need ArrayUtil validation (this class does it's own)
         $defaultOptions['omitValidation']   = true;
         
         $this->defaultOptions = $defaultOptions;
-    }
-    
-    protected function validateOptions(array $options)
-    {
-        ValidationUtil::requireValidOptions($options, array('keySeparator', 'arrayPrototype'));
     }
 }

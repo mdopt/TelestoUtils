@@ -45,7 +45,7 @@ abstract class WildcardKeyUtil
      *
      * @return  array
      */
-    public static function getArrayKeyPaths($array, $inputPathRepr, array $options = array())
+    public static function getInputKeyPaths($array, array $inputPathRepr, array $options = array())
     {
         if (!static::isArrayCompatible($array)) {
             throw new InvalidArgumentException(
@@ -110,6 +110,38 @@ abstract class WildcardKeyUtil
         }
         
         return $keyPaths;
+    }
+    
+    /**
+     * @param   array       $inputKeyPath
+     * @param   array       $inputPathRepr
+     * @param   array       $outputPathRepr
+     *
+     * @return  array
+     */
+    public static function getOutputKeyPath(array $inputKeyPath, array $inputPathRepr, array $outputPathRepr)
+    {
+        $parameterIndexes = array_flip($inputPathRepr['parameters']);
+        $outputKeyPath = array();
+        
+        foreach ($outputPathRepr as $outputKeyRepr) {
+            $outputKey = '';
+            
+            foreach ($outputKeyRepr as $outputKeyReprEntry) {
+                list ($isParameter, $content) = $outputKeyReprEntry;
+                
+                if ($isParameter) {
+                    $outputKey .= $inputKeyPath[$parameterIndexes[$content]];
+                }
+                else {
+                    $outputKey .= $content;
+                }
+            }
+            
+            $outputKeyPath[] = $outputKey;
+        }
+        
+        return $outputKeyPath;
     }
     
     /**

@@ -7,14 +7,14 @@ use Telesto\Utils\Arrays\WildcardKeyUtil;
 class WildcardKeyUtilTest extends \PHPUnit_Framework_TestCase
 {
     /**
-     * @dataProvider provideGetArrayKeyPathsData
+     * @dataProvider provideGetInputKeyPathsData
      */
-    public function testGetArrayKeyPaths($expectedResult, $array, $inputPathRepr, array $options = array())
+    public function testGetInputKeyPaths($expectedResult, $array, $inputPathRepr, array $options = array())
     {
-        $this->assertSame($expectedResult, WildcardKeyUtil::getArrayKeyPaths($array, $inputPathRepr, $options));
+        $this->assertSame($expectedResult, WildcardKeyUtil::getInputKeyPaths($array, $inputPathRepr, $options));
     }
     
-    public function provideGetArrayKeyPathsData()
+    public function provideGetInputKeyPathsData()
     {
         return array(
             array(
@@ -163,16 +163,16 @@ class WildcardKeyUtilTest extends \PHPUnit_Framework_TestCase
     }
     
     /**
-     * @dataProvider provideGetArrayKeyPathsExceptionsData
+     * @dataProvider provideGetInputKeyPathsExceptionsData
      */
-    public function testGetArrayKeyPathsExceptions($expectedException, $array, $inputPathRepr, array $options = array())
+    public function testGetInputKeyPathsExceptions($expectedException, $array, $inputPathRepr, array $options = array())
     {
         $this->setExpectedException($expectedException[0], $expectedException[1]);
         
-        WildcardKeyUtil::getArrayKeyPaths($array, $inputPathRepr, $options);
+        WildcardKeyUtil::getInputKeyPaths($array, $inputPathRepr, $options);
     }
     
-    public function provideGetArrayKeyPathsExceptionsData()
+    public function provideGetInputKeyPathsExceptionsData()
     {
         return array(
             array(
@@ -211,6 +211,64 @@ class WildcardKeyUtilTest extends \PHPUnit_Framework_TestCase
                     'keyPath'       => array('static', '%x%'),
                     'parameters'    => array(
                         1           => 'x'
+                    )
+                )
+            )
+        );
+    }
+    
+    /**
+     * @dataProvider provideGetOutputKeyPathData
+     */
+    public function testGetOutputKeyPath(
+        $expectedResult,
+        array $inputKeyPath,
+        array $inputPathRepr,
+        array $outputPathRepr
+    )
+    {
+        $this->assertSame($expectedResult, WildcardKeyUtil::getOutputKeyPath($inputKeyPath, $inputPathRepr, $outputPathRepr));
+    }
+    
+    public function provideGetOutputKeyPathData()
+    {
+        return array(
+            array(
+                array('static', 'first'),
+                array('static', 'first'),
+                array(
+                    'keyPath'       => array('static', '%x%'),
+                    'parameters'    => array(
+                        1           => 'x'
+                    )
+                ),
+                array(
+                    array(
+                        array(false, 'static')
+                    ),
+                    array(
+                        array(true, 'x')
+                    )
+                )
+            ),
+            array(
+                array('static', '0_1'),
+                array('static', '0', '1'),
+                array(
+                    'keyPath'       => array('static', '%x%', '%y%'),
+                    'parameters'    => array(
+                        1           => 'x',
+                        2           => 'y'
+                    )
+                ),
+                array(
+                    array(
+                        array(false, 'static')
+                    ),
+                    array(
+                        array(true, 'x'),
+                        array(false, '_'),
+                        array(true, 'y')
                     )
                 )
             )

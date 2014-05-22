@@ -1,6 +1,6 @@
 <?php
 
-namespace Telesto\Utils\Arrays\Overwriting\Copy;
+namespace Telesto\Utils\Arrays\Overwriting\Copy\KeyPathMap;
 
 use Telesto\Utils\Arrays\Overwriting\Overwriter;
 use Telesto\Utils\ArrayUtil;
@@ -57,7 +57,7 @@ use LengthException;
  * @see ArrayUtil::getElementByKeyPath
  * @see ArrayUtil::setElementByKeyPath
  */
-class KeyPathMapOverwriter implements Overwriter
+class TrivialOverwriter implements Overwriter
 {
     /**
      * Internal representation of key paths in the form of an array: [

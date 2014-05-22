@@ -1,12 +1,12 @@
 <?php
 
-namespace Telesto\Utils\Tests\Arrays\Overwriting\Copy;
+namespace Telesto\Utils\Tests\Arrays\Overwriting\Copy\KeyPathMap;
 
-use Telesto\Utils\Arrays\Overwriting\Copy\KeyPathMapOverwriter;
+use Telesto\Utils\Arrays\Overwriting\Copy\KeyPathMap\TrivialOverwriter;
 
 use ArrayObject;
 
-class KeyPathMapOverwriterTest extends \PHPUnit_Framework_TestCase
+class TrivialOverwriterTest extends \PHPUnit_Framework_TestCase
 {
     /**
      * @dataProvider provideConstructorExceptionsData
@@ -22,7 +22,7 @@ class KeyPathMapOverwriterTest extends \PHPUnit_Framework_TestCase
             $expectedException[1]
         );
         
-        new KeyPathMapOverwriter($keyPathMap, $settings);
+        new TrivialOverwriter($keyPathMap, $settings);
     }
     
     public function provideConstructorExceptionsData()
@@ -63,7 +63,7 @@ class KeyPathMapOverwriterTest extends \PHPUnit_Framework_TestCase
         array $options = array()
     )
     {
-        $overwriter = new KeyPathMapOverwriter($keyPathMap, $defaultOptions);
+        $overwriter = new TrivialOverwriter($keyPathMap, $defaultOptions);
         $overwriter->overwrite($input, $output, $options);
         
         $this->assertSame($expectedOutput, $output);
@@ -238,7 +238,7 @@ class KeyPathMapOverwriterTest extends \PHPUnit_Framework_TestCase
         array $defaultOptions = array()
     )
     {
-        $overwriter = new KeyPathMapOverwriter($keyPathMap, $defaultOptions);
+        $overwriter = new TrivialOverwriter($keyPathMap, $defaultOptions);
         $overwriter->overwrite($input, $output);
         
         // can't compare objects using assertSame
@@ -312,7 +312,7 @@ class KeyPathMapOverwriterTest extends \PHPUnit_Framework_TestCase
             $expectedException[1]
         );
         
-        $overwriter = new KeyPathMapOverwriter($keyPathMap, $defaultOptions);
+        $overwriter = new TrivialOverwriter($keyPathMap, $defaultOptions);
         $overwriter->overwrite($input, $output, $options);
     }
     

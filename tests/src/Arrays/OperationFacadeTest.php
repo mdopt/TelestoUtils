@@ -118,7 +118,7 @@ class OperationFacadeTest extends \PHPUnit_Framework_TestCase
         );
         
         $this->assertEquals(
-            new Overwriting\Copy\KeyPathMapOverwriter(
+            new Overwriting\Copy\KeyPathMap\TrivialOverwriter(
                 array(
                     array('x', 'y')
                 )
@@ -136,7 +136,7 @@ class OperationFacadeTest extends \PHPUnit_Framework_TestCase
     {
         $this->assertEquals(
             new Transformation\CreateAndOverwriteTransformer(
-                new Overwriting\Copy\KeyPathMapOverwriter(
+                new Overwriting\Copy\KeyPathMap\TrivialOverwriter(
                     array(
                         array('x', 'y')
                     )

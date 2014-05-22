@@ -5,8 +5,14 @@ namespace Telesto\Utils\Arrays;
 use Telesto\Utils\ArrayUtil;
 use Telesto\Utils\CommonUtil;
 use Telesto\Utils\StringUtil;
+use Telesto\Utils\TypeUtil;
 
+use Telesto\Utils\Arrays\ReturnMode;
+
+use Traversable;
+use ArrayAccess;
 use DomainException;
+use InvalidArgumentException;
 
 /**
  * Utility for wildcard keys and key paths.
@@ -15,11 +21,130 @@ use DomainException;
  */
 abstract class WildcardKeyUtil
 {
+    const COMPATIBLE_TYPE_INFO = 'an array or an object implementing both Traversable and ArrayAccess interfaces';
+    
+    /**
+     * Returns key paths to query given an array or array-like object and
+     * input path wildcard representation(see getInputPathRepr).
+     *
+     * Example result of this method:
+     *
+     * <code>
+     * [
+     *     ['key', 'deeperKey', ...],
+     *     ['key', 'deeperKey2', ...],
+     *     ...
+     * ]
+     * </code>
+     *
+     * @param   array|object        $array          Either array or object implementing
+     *                                              both ArrayAccess and Traversable
+     *                                                          
+     * @param   array               $inputPathRepr  see getInputPathRepr
+     * @param   array               $options
+     *
+     * @return  array
+     */
+    public static function getArrayKeyPaths($array, $inputPathRepr, array $options = array())
+    {
+        if (!static::isArrayCompatible($array)) {
+            throw new InvalidArgumentException(
+                sprintf('Argument $array is not compatible type (expected %s, got %s).', static::COMPATIBLE_TYPE_INFO, TypeUtil::getType($array))
+            );
+        }
+        
+        $omitNonExisting    = !empty($options['omitNonExisting']);
+        
+        $searchOptions         = array(
+            'returnMode'            => ReturnMode::BOTH,
+            'omitValidation'        => true
+        );
+        
+        $keyPaths = array();
+        
+        foreach ($inputPathRepr['keyPath'] as $keyIndex => $key) {
+            $isParameter = isset($inputPathRepr['parameters'][$keyIndex]);
+            
+            if ($keyIndex === 0) {
+                $deeperKeys = $isParameter? ArrayUtil::getKeys($array) : array($key);
+                
+                foreach ($deeperKeys as $deeperKey) {
+                    $keyPaths[] = array($deeperKey);
+                }
+                
+                continue;
+            }
+            
+            $newKeyPaths = array();
+            
+            foreach ($keyPaths as $keyPath) {
+                list ($innerArray, $exists) = ArrayUtil::getElementByKeyPath($array, $keyPath, $searchOptions);
+                $isArrayCompatible = static::isArrayCompatible($innerArray);
+                
+                if ($omitNonExisting && (!$exists || !$isArrayCompatible)) {
+                    continue;
+                }
+                
+                if (!$isParameter) {
+                    $newKeyPaths[] = array_merge($keyPath, array($key));
+                    continue;
+                }
+                
+                if (!$exists) {
+                    throw new DomainException(sprintf('Element at key path %s does not exist.', json_encode($keyPath)));
+                }
+                else if (!$isArrayCompatible) {
+                    throw new InvalidArgumentException(
+                        sprintf('Element at key path %s is not compatible type (expected %s, got %s).', json_encode($keyPath), static::COMPATIBLE_TYPE_INFO, TypeUtil::getType($innerArray))
+                    );
+                }
+                
+                $deeperKeys = ArrayUtil::getKeys($innerArray);
+                
+                foreach ($deeperKeys as $deeperKey) {
+                    $newKeyPaths[] = array_merge($keyPath, array($deeperKey));
+                }
+            }
+            
+            $keyPaths = $newKeyPaths;
+        }
+        
+        return $keyPaths;
+    }
+    
+    /**
+     * Returns representation of wildcard key path map relation as an array:
+     *
+     * <code>
+     * [
+     *     [inputPathRepr, [outputPathRepr1, outputPathRepr2, ...]],
+     *     ...
+     * ]
+     * </code>
+     *
+     * @param   array           $keyPathMap
+     * @param   array           $options
+     *
+     * @return  array
+     */
+    public static function getPathMapRepr(array $keyPathMap, array $options = array())
+    {
+        $repr = array();
+        
+        foreach ($keyPathMap as $inputKeyPath => $outputKeyPaths) {
+            $repr[] = static::getPathRepr($inputKeyPath, $outputKeyPaths, $options);
+        }
+        
+        return $repr;
+    }
+    
     /**
      * Returns representation of wildcard inputKeyPath -> outputKeyPath relation
      * as an array:
-     * 
+     *
+     * <code>
      * [inputPathRepr, [outputPathRepr1, outputPathRepr2, ...]]
+     * </code>
      *
      * @param   string              $inputKeyPath
      * @param   string|string[]     $outputKeyPaths
@@ -29,7 +154,7 @@ abstract class WildcardKeyUtil
      *
      * @throws  LogicException
      */
-    public static function getPathRepr($inputKeyPath, $outputKeyPaths, array $options)
+    public static function getPathRepr($inputKeyPath, $outputKeyPaths, array $options = array())
     {
         $outputKeyPaths = is_array($outputKeyPaths)? $outputKeyPaths : array($outputKeyPaths);
         
@@ -155,7 +280,7 @@ abstract class WildcardKeyUtil
      *
      * <code>
      * [
-     *     [isVariable: bool, content: string]
+     *     [isParameter: bool, content: string]
      * ]
      * </code>
      *
@@ -240,6 +365,11 @@ abstract class WildcardKeyUtil
         }
         
         return $repr;
+    }
+    
+    public static function isArrayCompatible($array)
+    {
+        return (is_array($array) || (($array instanceof \Traversable) && ($array instanceof \ArrayAccess)));
     }
     
     public static function getMultipleOutputKeyReprParams(array $reprs)

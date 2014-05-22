@@ -92,6 +92,41 @@ abstract class ValidationUtil
         }
     }
     
+    public static function requireValidKeyPathMap(array $keyPathMap)
+    {
+        foreach ($keyPathMap as $inputKeyPath => $outputKeyPath) {
+            $originalOutputKeyPath = $outputKeyPath;
+            $outputKeyPaths = is_array($outputKeyPath)? $outputKeyPath : array($outputKeyPath);
+            
+            foreach ($outputKeyPaths as $index => $outputKeyPath) {
+                try {
+                    static::requireValidKeyPath($outputKeyPath);
+                }
+                catch (LogicException $e) {
+                    $exceptionClass = get_class($e);
+                    
+                    if (is_array($originalOutputKeyPath)) {
+                        $newMessage = sprintf(
+                            'Invalid output key path for input key path \'%s\'(subindex %s): %s',
+                            $inputKeyPath,
+                            $index,
+                            $e->getMessage()
+                        );
+                    }
+                    else {
+                        $newMessage = sprintf(
+                            'Invalid output key path for input key path \'%s\': %s',
+                            $inputKeyPath,
+                            $e->getMessage()
+                        );
+                    }
+                    
+                    throw new $exceptionClass($newMessage, $e->getCode(), $e);
+                }
+            }
+        }
+    }
+    
     /**
      * @param   mixed[]     $options
      * @param   string[]    $keys       Keys of $options array which have to be validated

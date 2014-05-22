@@ -7,6 +7,300 @@ use Telesto\Utils\Arrays\WildcardKeyUtil;
 class WildcardKeyUtilTest extends \PHPUnit_Framework_TestCase
 {
     /**
+     * @dataProvider provideGetArrayKeyPathsData
+     */
+    public function testGetArrayKeyPaths($expectedResult, $array, $inputPathRepr, array $options = array())
+    {
+        $this->assertSame($expectedResult, WildcardKeyUtil::getArrayKeyPaths($array, $inputPathRepr, $options));
+    }
+    
+    public function provideGetArrayKeyPathsData()
+    {
+        return array(
+            array(
+                array(
+                    array('static')
+                ),
+                array(),
+                array(
+                    'keyPath'       => array('static'),
+                    'parameters'    => array()
+                )
+            ),
+            array(
+                array(
+                    array('first'),
+                    array('second'),
+                    array('third')
+                ),
+                array(
+                    'first'         => 1,
+                    'second'        => 2,
+                    'third'         => 3
+                ),
+                array(
+                    'keyPath'       => array('%x%'),
+                    'parameters'    => array(
+                        0           => 'x'
+                    )
+                )
+            ),
+            array(
+                array(
+                    array('static', 'static2')
+                ),
+                array(),
+                array(
+                    'keyPath'       => array('static', 'static2'),
+                    'parameters'    => array()
+                )
+            ),
+            array(
+                array(
+                    array('first', 'static'),
+                    array('second', 'static')
+                ),
+                array(
+                    'first'         => array(
+                        'static'    => 10
+                    ),
+                    'second'        => 10
+                ),
+                array(
+                    'keyPath'       => array('%x%', 'static'),
+                    'parameters'    => array(
+                        0           => 'x'
+                    )
+                )
+            ),
+            array(
+                array(
+                    array('static', 'first'),
+                    array('static', 'second'),
+                    array('static', 'third')
+                ),
+                array(
+                    'static'        => array(
+                        'first'     => 1,
+                        'second'    => 2,
+                        'third'     => 3
+                    )
+                ),
+                array(
+                    'keyPath'       => array('static', '%x%'),
+                    'parameters'    => array(
+                        1           => 'x'
+                    )
+                )
+            ),
+            array(
+                array(
+                    array('data', 'colors', 0, 'name'),
+                    array('data', 'colors', 0, 'hex'),
+                    array('data', 'colors', 1, 'name'),
+                    array('data', 'colors', 1, 'hex'),
+                    array('data', 'people', 0, 'name'),
+                    array('data', 'people', 0, 'city')
+                ),
+                array(
+                    'data'              => array(
+                        'colors'        => array(
+                            array(
+                                'name'  => 'red',
+                                'hex'   => 'ff0000'
+                            ),
+                            array(
+                                'name'  => 'blue',
+                                'hex'   => '0000ff'
+                            )
+                        ),
+                        'people'        => array(
+                            array(
+                                'name'  => 'John',
+                                'city'  => 'New York'
+                            )
+                        )
+                    )
+                ),
+                array(
+                    'keyPath'       => array('data', '%x%', '%y%', '%z%'),
+                    'parameters'    => array(
+                        1           => 'x',
+                        2           => 'y',
+                        3           => 'z'
+                    )
+                )
+            ),
+            array(
+                array(),
+                array(
+                    'static'        => 1023
+                ),
+                array(
+                    'keyPath'       => array('static', '%x%'),
+                    'parameters'    => array(
+                        1           => 'x'
+                    )
+                ),
+                array(
+                    'omitNonExisting'   => true
+                )
+            ),
+            array(
+                array(),
+                array(),
+                array(
+                    'keyPath'       => array('static', '%x%'),
+                    'parameters'    => array(
+                        1           => 'x'
+                    )
+                ),
+                array(
+                    'omitNonExisting'   => true
+                )
+            )
+        );
+    }
+    
+    /**
+     * @dataProvider provideGetArrayKeyPathsExceptionsData
+     */
+    public function testGetArrayKeyPathsExceptions($expectedException, $array, $inputPathRepr, array $options = array())
+    {
+        $this->setExpectedException($expectedException[0], $expectedException[1]);
+        
+        WildcardKeyUtil::getArrayKeyPaths($array, $inputPathRepr, $options);
+    }
+    
+    public function provideGetArrayKeyPathsExceptionsData()
+    {
+        return array(
+            array(
+                array(
+                    'InvalidArgumentException',
+                    'Argument $array is not compatible type'
+                ),
+                1023,
+                array(
+                    'keyPath'       => array('static'),
+                    'parameters'    => array()
+                )
+            ),
+            array(
+                array(
+                    'InvalidArgumentException',
+                    'Element at key path ["static"] is not compatible type'
+                ),
+                array(
+                    'static'        => 1023
+                ),
+                array(
+                    'keyPath'       => array('static', '%x%'),
+                    'parameters'    => array(
+                        1           => 'x'
+                    )
+                )
+            ),
+            array(
+                array(
+                    'DomainException',
+                    'Element at key path ["static"] does not exist.'
+                ),
+                array(),
+                array(
+                    'keyPath'       => array('static', '%x%'),
+                    'parameters'    => array(
+                        1           => 'x'
+                    )
+                )
+            )
+        );
+    }
+    
+    /**
+     * @dataProvider provideGetPathMapReprData
+     */
+    public function testGetPathMapRepr(
+        $expectedResult,
+        $keyPathMap,
+        $options = array()
+    )
+    {
+        $this->assertSame(
+            $expectedResult,
+            WildcardKeyUtil::getPathMapRepr($keyPathMap, $options)
+        );
+    }
+    
+    public function provideGetPathMapReprData()
+    {
+        return array(
+            array(
+                array(
+                    array(
+                        array(
+                            'keyPath'   => array('static', '%x%', '%y%'),
+                            'parameters'=> array(
+                                1       => 'x',
+                                2       => 'y'
+                            )
+                        ),
+                        array(
+                            array(
+                                array(
+                                    array(false, 's')
+                                ),
+                                array(
+                                    array(true, 'y')
+                                ),
+                                array(
+                                    array(true, 'x')
+                                )
+                            ),
+                            array(
+                                array(
+                                    array(false, 's2_'),
+                                    array(true, 'y'),
+                                    array(false, '_'),
+                                    array(true, 'x')
+                                )
+                            )
+                        )
+                    ),
+                    array(
+                        array(
+                            'keyPath'   => array('static3', '%x%'),
+                            'parameters'=> array(
+                                1       => 'x'
+                            )
+                        ),
+                        array(
+                            array(
+                                array(
+                                    array(false, 's3')
+                                ),
+                                array(
+                                    array(false, 'deeper')
+                                ),
+                                array(
+                                    array(true, 'x')
+                                )
+                            )
+                        )
+                    )
+                ),
+                array(
+                    'static/%x%/%y%'    => array('s/%y%/%x%', 's2_%y%_%x%'),
+                    'static3/%x%'       => 's3/deeper/%x%'
+                ),
+                array(
+                    'keySeparator'      => '/'
+                )
+            )
+        );
+    }
+    
+    /**
      * @dataProvider provideGetPathReprData
      */
     public function testGetPathRepr(

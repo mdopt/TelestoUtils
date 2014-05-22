@@ -158,7 +158,7 @@ class KeyPathMapOverwriter implements Overwriter
     
     protected function setKeyPaths(array $keyPathMap)
     {
-        $this->validateKeyPathMap($keyPathMap);
+        ValidationUtil::requireValidKeyPathMap($keyPathMap);
         $keyPaths = array();
         
         foreach ($keyPathMap as $inputKeyPath => $outputKeyPaths) {
@@ -187,41 +187,6 @@ class KeyPathMapOverwriter implements Overwriter
         $defaultOptions['omitValidation']   = true;
         
         $this->defaultOptions = $defaultOptions;
-    }
-    
-    protected function validateKeyPathMap(array $keyPathMap)
-    {
-        foreach ($keyPathMap as $inputKeyPath => $outputKeyPath) {
-            $originalOutputKeyPath = $outputKeyPath;
-            $outputKeyPaths = is_array($outputKeyPath)? $outputKeyPath : array($outputKeyPath);
-            
-            foreach ($outputKeyPaths as $index => $outputKeyPath) {
-                try {
-                    ValidationUtil::requireValidKeyPath($outputKeyPath);
-                }
-                catch (LogicException $e) {
-                    $exceptionClass = get_class($e);
-                    
-                    if (is_array($originalOutputKeyPath)) {
-                        $newMessage = sprintf(
-                            'Invalid output key path for input key path \'%s\'(subindex %s): %s',
-                            $inputKeyPath,
-                            $index,
-                            $e->getMessage()
-                        );
-                    }
-                    else {
-                        $newMessage = sprintf(
-                            'Invalid output key path for input key path \'%s\': %s',
-                            $inputKeyPath,
-                            $e->getMessage()
-                        );
-                    }
-                    
-                    throw new $exceptionClass($newMessage, $e->getCode(), $e);
-                }
-            }
-        }
     }
     
     protected function validateOptions(array $options)

@@ -8,6 +8,84 @@ use Telesto\Utils\Arrays\ReturnMode;
 class ArrayUtilTest extends \PHPUnit_Framework_TestCase
 {
     /**
+     * @dataProvider provideGetKeysData
+     */
+    public function testGetKeys($expectedResult, $input)
+    {
+        $this->assertSame($expectedResult, ArrayUtil::getKeys($input));
+    }
+    
+    public function provideGetKeysData()
+    {
+        return array(
+            array(
+                array(),
+                array()
+            ),
+            array(
+                array('x', 'y'),
+                array(
+                    'x'     => 10,
+                    'y'     => 20
+                )
+            ),
+            array(
+                array(0, 'x', 'y'),
+                new \ArrayObject(
+                    array(
+                        100,
+                        'x'     => 10,
+                        'y'     => 20
+                    )
+                )
+            )
+        );
+    }
+    
+    /**
+     * @dataProvider provideGetKeyExceptionsData
+     */
+    public function testGetKeyExceptions($expectedException, $input, $options = array())
+    {
+        $this->setExpectedException($expectedException[0], $expectedException[1]);
+        
+        ArrayUtil::getKeys($input, $options);
+    }
+    
+    public function provideGetKeyExceptionsData()
+    {
+        return array(
+            array(
+                array(
+                    'InvalidArgumentException',
+                    ''
+                ),
+                102
+            ),
+            array(
+                array(
+                    'InvalidArgumentException',
+                    ''
+                ),
+                102,
+                array(
+                    'omitValidation'    => false
+                )
+            ),
+            array(
+                array(
+                    'PHPUnit_Framework_Error',
+                    ''
+                ),
+                102,
+                array(
+                    'omitValidation'    => true
+                )
+            )
+        );
+    }
+    
+    /**
      * @dataProvider provideGetElementByKeyPathData
      */
     public function testGetElementByKeyPath(

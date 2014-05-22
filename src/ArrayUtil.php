@@ -6,6 +6,7 @@ use Telesto\Utils\Arrays\ReturnMode;
 use Telesto\Utils\Arrays\ValidationUtil;
 
 use ArrayAccess;
+use Traversable;
 
 use InvalidArgumentException;
 use RuntimeException;
@@ -14,6 +15,30 @@ use LogicException;
 
 abstract class ArrayUtil
 {
+    /**
+     * $options:
+     * - omitValidation         [bool]      default: false
+     *
+     * @param   array|Traversable           $input
+     * @param   array                       $options
+     *
+     * @return  array
+     *
+     * @throws  LogicException              on invalid arguments
+     */
+    public static function getKeys($input, array $options = array())
+    {
+        if (empty($options['omitValidation'])) {
+            TypeUtil::requireType($input, 'array|Traversable', '$input');
+        }
+        
+        if (!is_array($input)) {
+            $input = iterator_to_array($input);
+        }
+        
+        return array_keys($input);
+    }
+    
     /**
      * $options:
      * - default                [mixed]     default: null.

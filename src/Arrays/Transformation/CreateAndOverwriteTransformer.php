@@ -2,14 +2,12 @@
 
 namespace Telesto\Utils\Arrays\Transformation;
 
-use Telesto\Utils\Arrays\Factories\Factory;
 use Telesto\Utils\Arrays\Overwriting\Overwriter;
 use Telesto\Utils\ArrayUtil;
 use Telesto\Utils\Arrays\ValidationUtil;
 
 /**
- * Transformer which uses factory to create a new array|ArrayAccess and then
- * performs overwriting.
+ * Transformer which creats a new array|ArrayAccess and then performs overwriting.
  *
  * Since you can perform any transformation this way, most of the 'real' work
  * is done by overwriters. This way we don't have to duplicate functionality.
@@ -22,19 +20,28 @@ use Telesto\Utils\Arrays\ValidationUtil;
 class CreateAndOverwriteTransformer implements Transformer
 {
     /**
-     * @var Factory
-     */
-    protected $factory;
-    
-    /**
      * @var Overwriter
      */
     protected $overwriter;
     
-    public function __construct(Factory $factory, Overwriter $overwriter)
+    /**
+     * @var array
+     */
+    protected $defaultOptions;
+    
+    /**
+     * $options:
+     * - arrayPrototype         [array|ArrayAccess]     default: empty array
+     *
+     * @param   Overwriter      $overwriter
+     * @param   array           $defaultOptions
+     */
+    public function __construct(Overwriter $overwriter, array $defaultOptions = array())
     {
-        $this->factory = $factory;
+        ValidationUtil::requireValidOptions($defaultOptions, array('arrayPrototype'));
+        
         $this->overwriter = $overwriter;
+        $this->defaultOptions = $defaultOptions;
     }
     
     /**
@@ -43,8 +50,12 @@ class CreateAndOverwriteTransformer implements Transformer
     public function transform($input, array $options = array())
     {
         ValidationUtil::requireArrayOrArrayAccess($input, '$input');
+        ValidationUtil::requireValidOptions($options, array('arrayPrototype'));
         
-        $output = $this->factory->createArray();
+        $localOptions = array_merge($this->defaultOptions, $options);
+        $arrayPrototype = isset($localOptions['arrayPrototype'])? $localOptions['arrayPrototype'] : array();
+        
+        $output = is_object($arrayPrototype)? clone $arrayPrototype : $arrayPrototype;
         $this->overwriter->overwrite($input, $output, $options);
         
         return $output;

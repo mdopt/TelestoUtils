@@ -84,11 +84,7 @@ abstract class OperationFacade
         }
         
         $overwriter = call_user_func_array(array(__CLASS__, 'createOverwriter'), func_get_args());
-        
-        return new Transformation\CreateAndOverwriteTransformer(
-            new Factories\PrototypeFactory(array()),
-            $overwriter
-        );
+        return new Transformation\CreateAndOverwriteTransformer($overwriter);
     }
     
     /**

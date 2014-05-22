@@ -5,7 +5,6 @@ namespace Telesto\Utils\Tests\Arrays;
 use Telesto\Utils\Arrays\OperationFacade;
 use Telesto\Utils\Arrays\Transformation;
 use Telesto\Utils\Arrays\Overwriting;
-use Telesto\Utils\Arrays\Factories;
 
 class OperationFacadeTest extends \PHPUnit_Framework_TestCase
 {
@@ -137,7 +136,6 @@ class OperationFacadeTest extends \PHPUnit_Framework_TestCase
     {
         $this->assertEquals(
             new Transformation\CreateAndOverwriteTransformer(
-                new Factories\PrototypeFactory(array()),
                 new Overwriting\Copy\KeyPathMapOverwriter(
                     array(
                         array('x', 'y')

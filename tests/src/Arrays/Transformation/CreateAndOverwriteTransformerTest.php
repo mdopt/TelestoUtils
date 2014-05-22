@@ -22,6 +22,7 @@ class CreateAndOverwriteTransformerTest extends \PHPUnit_Framework_TestCase
     {
         $input = new \ArrayObject;
         $expectedOutput = array('x' => 10);
+        $options = array('setting1'=> 1, 'setting2'=> 2);
         
         $mockOverwriter = $this->getMock('Telesto\Utils\Arrays\Overwriting\Overwriter');
         $mockOverwriter
@@ -29,7 +30,8 @@ class CreateAndOverwriteTransformerTest extends \PHPUnit_Framework_TestCase
             ->method('overwrite')
             ->with(
                 $this->identicalTo($input),
-                $this->identicalTo($expectedOutput)
+                $this->identicalTo($expectedOutput),
+                $this->identicalTo($options)
             )
         ;
         
@@ -40,8 +42,28 @@ class CreateAndOverwriteTransformerTest extends \PHPUnit_Framework_TestCase
             )
         );
         
-        $output = $transformer->transform($input);
+        $output = $transformer->transform($input, $options);
         $this->assertSame($expectedOutput, $output);
+    }
+    
+    public function testTransformWithArrayPrototypePerOperation()
+    {
+        $mockOverwriter = $this->getMock('Telesto\Utils\Arrays\Overwriting\Overwriter');
+        $mockOverwriter
+            ->expects($this->any())
+            ->method('overwrite')
+        ;
+        
+        $transformer = new CreateAndOverwriteTransformer($mockOverwriter);
+        
+        $output = $transformer->transform(
+            array(),
+            array(
+                'arrayPrototype'    => array(1, 2, 3, 4)
+            )
+        );
+        
+        $this->assertSame(array(1, 2, 3, 4), $output);
     }
     
     public function testTransformException()

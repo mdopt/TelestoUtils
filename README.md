@@ -1,9 +1,9 @@
-General-purpose library for php.
+###General-purpose library for php.
 
 
 The following examples use shorter array syntax from php 5.4+ for brevity, but the library works also for older versions (5.3.2+ to be precise).
 
-Strings:
+####Strings:
 
 ``StringUtil::explode`` (standard explode with escaping delimiter feature)
 
@@ -42,7 +42,7 @@ StringUtil::substrMaxConsecutiveCount(' @ @@@ @@', '@');
 ```
 
 
-Arrays:
+####Arrays:
 
 ``ArrayUtil::getKeys`` (works like array_keys, but also supports iterators)
 

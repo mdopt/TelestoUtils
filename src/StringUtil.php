@@ -8,7 +8,7 @@ use DomainException;
 abstract class StringUtil
 {
     /**
-     * Works similarly to standard explode function, but has additional features.
+     * Works like standard explode function, but has additional escaping feature.
      *
      * $options:
      * - escapeChar     string|null         Allows to escape the delimiter. Can be any single character.
@@ -25,6 +25,8 @@ abstract class StringUtil
      * @param   string      $string
      * @param   int|null    $limit
      * @param   array       $options
+     *
+     * @return  array
      */
     public static function explode($delimiter, $string, $limit = null, array $options = array())
     {
@@ -94,9 +96,15 @@ abstract class StringUtil
     }
     
     /**
+     * Works like standard implode function, but has additional escaping feature.
+     *
      * @param   string      $glue
      * @param   array       $pieces
      * @param   array       $options    See explode options
+     *
+     * @return  string
+     *
+     * @see     StringUtil::escape
      */
     public static function implode($glue, array $pieces, array $options = array())
     {
@@ -123,7 +131,7 @@ abstract class StringUtil
      * Finds the positions of all occurrences of a substring in a string.
      *
      * <code>
-     *  StringUtil::strposAll(' x xx x', 'x'); // returns [1, 3, 4, 6]
+     * StringUtil::strposAll(' x xx x', 'x'); // returns [1, 3, 4, 6]
      * </code>
      *
      * @param   string      $haystack
@@ -174,7 +182,7 @@ abstract class StringUtil
      * of a substring in a string
      *
      * <code>
-     *  StringUtil::substrConsecutiveCounts(' x xxx x xx', 'x'); // returns [1, 3, 1, 2]
+     * StringUtil::substrConsecutiveCounts(' x xxx x xx', 'x'); // returns [1, 3, 1, 2]
      * </code>
      * 
      * @param   string      $haystack

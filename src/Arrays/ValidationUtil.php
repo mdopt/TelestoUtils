@@ -92,6 +92,13 @@ abstract class ValidationUtil
         }
     }
     
+    /**
+     * @param   array   $keyPathMap
+     *
+     * @return  void
+     *
+     * @throws  LogicException
+     */
     public static function requireValidKeyPathMap(array $keyPathMap)
     {
         foreach ($keyPathMap as $inputKeyPath => $outputKeyPath) {

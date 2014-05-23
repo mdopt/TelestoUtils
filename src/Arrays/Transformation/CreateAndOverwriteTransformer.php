@@ -7,7 +7,7 @@ use Telesto\Utils\ArrayUtil;
 use Telesto\Utils\Arrays\ValidationUtil;
 
 /**
- * Transformer which creats a new array|ArrayAccess and then performs overwriting.
+ * Transformer which creates a new array|ArrayAccess and then performs overwriting.
  *
  * Since you can perform any transformation this way, most of the 'real' work
  * is done by overwriters. This way we don't have to duplicate functionality.

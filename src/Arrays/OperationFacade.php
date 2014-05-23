@@ -131,6 +131,6 @@ abstract class OperationFacade
     
     protected static function createCopyKeyPathMapOverwriter()
     {
-        return CommonUtil::createObject('Telesto\Utils\Arrays\Overwriting\Copy\KeyPathMap\TrivialOverwriter', func_get_args());
+        return CommonUtil::createObject('Telesto\Utils\Arrays\Overwriting\Copy\KeyPathMap\BasicOverwriter', func_get_args());
     }
 }

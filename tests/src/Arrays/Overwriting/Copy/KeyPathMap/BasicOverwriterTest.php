@@ -2,11 +2,11 @@
 
 namespace Telesto\Utils\Tests\Arrays\Overwriting\Copy\KeyPathMap;
 
-use Telesto\Utils\Arrays\Overwriting\Copy\KeyPathMap\TrivialOverwriter;
+use Telesto\Utils\Arrays\Overwriting\Copy\KeyPathMap\BasicOverwriter;
 
 use ArrayObject;
 
-class TrivialOverwriterTest extends \PHPUnit_Framework_TestCase
+class BasicOverwriterTest extends \PHPUnit_Framework_TestCase
 {
     /**
      * @dataProvider provideConstructorExceptionsData
@@ -22,7 +22,7 @@ class TrivialOverwriterTest extends \PHPUnit_Framework_TestCase
             $expectedException[1]
         );
         
-        new TrivialOverwriter($keyPathMap, $settings);
+        new BasicOverwriter($keyPathMap, $settings);
     }
     
     public function provideConstructorExceptionsData()
@@ -63,7 +63,7 @@ class TrivialOverwriterTest extends \PHPUnit_Framework_TestCase
         array $options = array()
     )
     {
-        $overwriter = new TrivialOverwriter($keyPathMap, $defaultOptions);
+        $overwriter = new BasicOverwriter($keyPathMap, $defaultOptions);
         $overwriter->overwrite($input, $output, $options);
         
         $this->assertSame($expectedOutput, $output);
@@ -238,7 +238,7 @@ class TrivialOverwriterTest extends \PHPUnit_Framework_TestCase
         array $defaultOptions = array()
     )
     {
-        $overwriter = new TrivialOverwriter($keyPathMap, $defaultOptions);
+        $overwriter = new BasicOverwriter($keyPathMap, $defaultOptions);
         $overwriter->overwrite($input, $output);
         
         // can't compare objects using assertSame
@@ -312,7 +312,7 @@ class TrivialOverwriterTest extends \PHPUnit_Framework_TestCase
             $expectedException[1]
         );
         
-        $overwriter = new TrivialOverwriter($keyPathMap, $defaultOptions);
+        $overwriter = new BasicOverwriter($keyPathMap, $defaultOptions);
         $overwriter->overwrite($input, $output, $options);
     }
     

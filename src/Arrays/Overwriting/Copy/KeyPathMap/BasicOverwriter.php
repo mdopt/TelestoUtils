@@ -57,7 +57,7 @@ use LengthException;
  * @see ArrayUtil::getElementByKeyPath
  * @see ArrayUtil::setElementByKeyPath
  */
-class TrivialOverwriter implements Overwriter
+class BasicOverwriter implements Overwriter
 {
     /**
      * Internal representation of key paths in the form of an array: [

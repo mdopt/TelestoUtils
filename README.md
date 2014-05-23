@@ -5,6 +5,11 @@ The following examples use shorter array syntax from php 5.4+ for brevity, but t
 
 ####Strings:
 
+```php
+use Telesto\Utils\StringUtil;
+```
+
+
 ``StringUtil::explode`` (standard explode with escaping delimiter feature)
 
 ```php
@@ -43,6 +48,13 @@ StringUtil::substrMaxConsecutiveCount(' @ @@@ @@', '@');
 
 
 ####Arrays:
+
+```php
+use Telesto\Utils\ArrayUtil;
+```
+
+Set of array functions that also work for objects implementing ArrayAccess interface.
+
 
 ``ArrayUtil::getKeys`` (works like array_keys, but also supports iterators)
 
@@ -140,7 +152,92 @@ ArrayUtil::unsetElementByKeyPath($array, 'point.y');
 */
 ```
 
+####Array Operations
 
+``Telesto\Utils\Arrays`` component provides interface for generic operations on arrays and objects implementing ArrayObject interface(some operations have additional requirements).
+
+There are 2 types of operations:
+- transformations (they produce output given the input)
+- overwrites (they are given 2 arguments and use the first to overwrite the second)
+
+Every transformation can be done by creating a new array and overwriting it(and that's the way it's implemented).
+
+Every transformer is an instance of ``Telesto\Utils\Arrays\Transformation\Transformer`` interface.
+Every overwriter is an instance of ``Telesto\Utils\Arrays\Overwriting\Overwriter`` interface.
+
+You can create these instances by yourself. The following example shows how to create and use transformer to perform 'copy by key path map' operation.
+
+```php
+use Telesto\Utils\Arrays\Overwriting\Copy\KeyPathMap\BasicOverwriter as KeyPathMapOverwriter;
+use Telesto\Utils\Arrays\Transformation\CreateAndOverwriteTransformer;
+
+$transformer = new CreateAndOverwriteTransformer(
+    new KeyPathMapOverwriter([
+        'points.0.x'    => 'p.x',
+        'points.0.y'    => 'p.y'
+    ])
+);
+
+$output = $transformer->transform([
+    'points'    => [
+        [
+            'x' => 10,
+            'y' => 20
+        ]
+    ]
+]);
+
+/*
+$output is [
+    'p' => [
+        'x' => 10,
+        'y' => 20
+    ]
+]
+*/
+```
+
+But this is requires a lot of boilerplate code. Here's a shorter version that uses OperationFacade:
+
+```php
+use Telesto\Utils\Arrays\OperationFacade;
+
+$transformer = OperationFacade::createTransformer('copy.byKeyPathMap', [
+    'points.0.x'    => 'p.x',
+    'points.0.y'    => 'p.y'
+]);
+
+$output = $transformer->transform([
+    'points'    => [
+        [
+            'x' => 10,
+            'y' => 20
+        ]
+    ]
+]);
+```
+
+or, if you only need to perform one operation and never use the transformer again:
+
+```php
+use Telesto\Utils\Arrays\OperationFacade;
+
+$output = OperationFacade::transform(
+    [
+        'points'    => [
+            [
+                'x' => 10,
+                'y' => 20
+            ]
+        ]
+    ],
+    'copy.byKeyPathMap',
+    [
+        'points.0.x'    => 'p.x',
+        'points.0.y'    => 'p.y'
+    ]
+);
+```
 
 
 License: MIT
